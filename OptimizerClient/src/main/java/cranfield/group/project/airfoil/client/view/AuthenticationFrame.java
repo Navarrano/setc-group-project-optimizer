@@ -52,18 +52,18 @@ public class AuthenticationFrame extends JFrame {
 		initComponents();
 		initConnection(host, port);
 
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        // Add Listener on the close-window button
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-            	// Terminate the socket connection with the server
+		// Add Listener on the close-window button
+		addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				// Terminate the socket connection with the server
 				if (client != null && client.isConnected())
 					client.terminateConnection();
-            }
-        });
+			}
+		});
 		pack();
-    }
+	}
 
 	private void initConnection(String host, int port) {
 		try {
@@ -111,7 +111,8 @@ public class AuthenticationFrame extends JFrame {
 		panel.add(loginButton);
 		panel.add(Box.createVerticalStrut(10));
 
-		getContentPane().add(Box.createHorizontalStrut(50), BorderLayout.LINE_START);
+		getContentPane().add(Box.createHorizontalStrut(50),
+				BorderLayout.LINE_START);
 		getContentPane().add(panel, BorderLayout.CENTER);
 		getContentPane().add(Box.createHorizontalStrut(50),
 				BorderLayout.LINE_END);
@@ -157,17 +158,18 @@ public class AuthenticationFrame extends JFrame {
 			char[] password = pass.getPassword();
 			String ppaswd = new String(password);
 			password = null;
-			if (client.areValidatedCredentials(puname, ppaswd)) {
+
+			String msg = client.areValidatedCredentials(puname, ppaswd);
+			if (msg == null) {
 				MainFrame mainFrame = new MainFrame(client);
-				//regFace.setVisible(true);
+				// regFace.setVisible(true);
 				dispose();
 			} else {
-				JOptionPane
-						.showMessageDialog(null, "Wrong Password / Username");
+				JOptionPane.showMessageDialog(null, msg);
 				txuser.setText("");
 				pass.setText("");
 				txuser.requestFocus();
-            }
+			}
 		}
 	}
 

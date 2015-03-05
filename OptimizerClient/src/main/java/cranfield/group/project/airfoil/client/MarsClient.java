@@ -1,10 +1,10 @@
 package cranfield.group.project.airfoil.client;
 
 import java.io.IOException;
-import java.util.Hashtable;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.Hashtable;
 
 public class MarsClient implements AutoCloseable {
 	private Socket clientSocket;
@@ -19,8 +19,9 @@ public class MarsClient implements AutoCloseable {
 		return clientSocket.isConnected();
 	}
 
-	public boolean areValidatedCredentials(String username, String password) {
-		boolean areValidatedCredentials = false;
+	public String areValidatedCredentials(String username, String password) {
+		// boolean areValidatedCredentials = false;
+		String msg = null;
 		String credentials[] = { "credentials", username, password };
 		try {
 			ObjectOutputStream out = new ObjectOutputStream(
@@ -34,7 +35,8 @@ public class MarsClient implements AutoCloseable {
 		ObjectInputStream in;
 		try {
 			in = new ObjectInputStream(clientSocket.getInputStream());
-			areValidatedCredentials = (boolean) in.readObject();
+			// areValidatedCredentials = (boolean) in.readObject();
+			msg = (String) in.readObject();
 			System.out.println("here!");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -44,7 +46,7 @@ public class MarsClient implements AutoCloseable {
 			e.printStackTrace();
 		}
 
-		return areValidatedCredentials;
+		return msg;
 	}
 
 	@Override

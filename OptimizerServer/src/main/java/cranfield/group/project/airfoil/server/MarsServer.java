@@ -3,9 +3,9 @@ package cranfield.group.project.airfoil.server;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.Set;
 
 import com.jcraft.jsch.JSchException;
 
@@ -18,26 +18,15 @@ import cranfield.group.project.airfoil.server.controllers.AstralConnection;
 public class MarsServer extends Thread {
 
 	/** The server socket */
-	protected ServerSocket serverSocket;
+	protected Socket client;
+	protected Set<String> connectedUsers;
 
 	/** The database handler. */
 	// protected DatabaseHandler databaseHandler;
 
-	/**
-	 * Mars Server constructor that instantiates the server socket in charge of
-	 * receiving the requests from clients and a database handler in charge of
-	 * the communication with the database
-	 *
-	 * @param port
-	 *            the port allocated to the socket receiving the
-	 *            clients'requests
-	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
-	 */
-	public MarsServer(int port) throws IOException {
-		serverSocket = new ServerSocket(port);
-		// databaseHandler = new DatabaseHandler();
-		// serverSocket.setSoTimeout(10000);
+	public MarsServer(Socket client, Set<String> users) {
+		this.client = client;
+		this.connectedUsers = users;
 	}
 
 	/*
@@ -46,36 +35,28 @@ public class MarsServer extends Thread {
 	 * @see java.lang.Thread#run()
 	 */
 	public void run() {
-		while (true) {
 			try {
-				System.out.println("SERVER : Waiting for client on port "
-						+ serverSocket.getLocalPort() + "...");
-				Socket server = serverSocket.accept();
-				System.out.println("SERVER : Just connected to "
-						+ server.getRemoteSocketAddress());
-
 				boolean isClientConnected = true;
 
 				while (isClientConnected) {
 					ObjectInputStream in = new ObjectInputStream(
-							server.getInputStream());
+							client.getInputStream());
 
 					String[] dataFromClient = (String[]) in.readObject();
 
 					switch (dataFromClient[0]) {
 					case "credentials":
-						validateConnection(server, dataFromClient);
+						validateConnection(client, dataFromClient);
 						break;
 					case "quit":
 						isClientConnected = false;
-						server.close();
+						client.close();
 						break;
 					}
 				}
 
 			} catch (SocketTimeoutException s) {
 				System.out.println("SERVER : Socket timed out!");
-				break;
 			} catch (ClassNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -83,7 +64,6 @@ public class MarsServer extends Thread {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}
 	}
 
 	/**
@@ -103,14 +83,16 @@ public class MarsServer extends Thread {
 		try {
 			out = new ObjectOutputStream(server.getOutputStream());
 
-			if (areValidCredentials(credentials)) {
-				out.writeObject(true);
+			String msg = areValidCredentialsWithError(credentials);
+
+			if (msg == null) {
+				out.writeObject(msg);
 				writeUserInformationInDatabase(credentials[1]);
 				// databaseHandler.addEventLog("Connection granted : username "
 				// + credentials[1], "info", "connection");
 				System.out.println("Good credentials");
 			} else {
-				out.writeObject(false);
+				out.writeObject(msg);
 				// databaseHandler.addEventLog("Connection denied : username "
 				// + credentials[1], "error", "connection");
 				System.out.println("Wrong credentials");
@@ -156,5 +138,18 @@ public class MarsServer extends Thread {
 			canConnectToAstral = false;
 		}
 		return canConnectToAstral;
+	}
+
+	protected String areValidCredentialsWithError(String[] credentials) {
+		if (connectedUsers.contains(credentials[1]))
+			return "User \"" + credentials[1]
+					+ "\" is already connected with server";
+		try (AstralConnection astralConnection = new AstralConnection(
+				credentials[1], credentials[2])) {
+			connectedUsers.add(credentials[1]);
+		} catch (JSchException e) {
+			return e.getMessage();
+		}
+		return null;
 	}
 }
