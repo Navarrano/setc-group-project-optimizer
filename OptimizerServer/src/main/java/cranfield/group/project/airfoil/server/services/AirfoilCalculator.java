@@ -10,7 +10,7 @@ public class AirfoilCalculator {
 	private final double airSpeed;
 	private final double minAirSpeed;
 
-	private final static double STEP_SIZE = 0.00001;
+	private final static double STEP_SIZE = 0.0001;
 
 	public AirfoilCalculator(double minDragCoeff, double aeroplaneMass,
 			double maxLiftCoeff, double airSpeed, double minAirSpeed) {
@@ -23,22 +23,30 @@ public class AirfoilCalculator {
 	}
 
 	public void optimize(double b, double c, double angle, int iterations) {
-		double deltaB = 1 / 100000.0;
-		double deltaC = 1 / 100000.0;
+		double deltaB = STEP_SIZE;
+		double deltaC = STEP_SIZE;
+		double deltaAngle = STEP_SIZE * 1000;
 		double oldB;
+		double oldC;
 		for (int i = 0; i < iterations; i++) {
 			oldB = b;
-			double dragForce = calcTotalDrag(oldB, c, angle);
-			double liftForce = calcLiftForce(oldB, c);
+			oldC = c;
+			double dragForce = calcTotalDrag(oldB, oldC, angle);
+			double liftForce = calcLiftForce(oldB, oldC);
 			System.out.format(
-"%d ==> Drag force: %.4f, Lift force: %.4f, RATIO: %.8f, b: %.3f c: %.3f\n",
+"%d ==> Drag force: %.4f, Lift force: %.4f, RATIO: %.8f, b: %.3f c: %.3f Angle: %.8f\n",
 							i, dragForce, liftForce, liftForce / dragForce,
-							b, c);
+ b,
+							c, angle);
 
 			b = b - STEP_SIZE
-					* calcNumericalDerivativeByB(oldB, c, angle, deltaB);
+					* calcNumericalDerivativeByB(oldB, oldC, angle, deltaB);
 			c = c - STEP_SIZE
-					* calcNumericalDerivativeByC(oldB, c, angle, deltaC);
+					* calcNumericalDerivativeByC(oldB, oldC, angle, deltaC);
+			angle = angle
+					- STEP_SIZE
+					* calcNumericalDerivativeByAngle(oldB, oldC, angle,
+							deltaAngle);
 		}
 	}
 
@@ -52,6 +60,12 @@ public class AirfoilCalculator {
 			double delta) {
 		return (calcObjectiveFunction(b, c + delta, angle) - calcObjectiveFunction(
 				b, c - delta, angle)) / (2 * delta);
+	}
+
+	public double calcNumericalDerivativeByAngle(double b, double c,
+			double angle, double delta) {
+		return (calcObjectiveFunction(b, c, angle + delta) - calcObjectiveFunction(
+				b, c, angle - delta)) / (2 * delta);
 	}
 
 	private double calcObjectiveFunction(double b, double c, double angle) {
