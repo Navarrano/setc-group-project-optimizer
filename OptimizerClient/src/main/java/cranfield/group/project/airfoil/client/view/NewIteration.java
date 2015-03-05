@@ -1,19 +1,18 @@
 package cranfield.group.project.airfoil.client.view;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.util.Hashtable;
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
+
+import cranfield.group.project.airfoil.client.MarsClient;
 
 /**
  *
@@ -21,27 +20,30 @@ import javax.swing.border.TitledBorder;
  */
 public class NewIteration extends JPanel {
 
-    ImageIcon icon = new ImageIcon("src/img/logo.png");
-    JLabel logo = new JLabel(icon);
-    JPanel panelInput = new JPanel();
-    JPanel panelInitVar = new JPanel();
-    JPanel panelButton = new JPanel();
-    JPanel panelComboBox = new JPanel();
-    JComboBox comboDragCoeff = new JComboBox();
-    String[] labelsInput = {"Aeroplane mass: ", "Minimal drag coefficient: ", "Maximum drag coeficient: ",
+    protected ImageIcon icon = new ImageIcon("src/img/logo.png");
+    protected JLabel logo = new JLabel(icon);
+    protected JPanel panelInput = new JPanel();
+    protected JPanel panelInitVar = new JPanel();
+    protected JPanel panelButton = new JPanel();
+    protected JPanel panelComboBox = new JPanel();
+    protected JComboBox<String[]> comboDragCoeff = new JComboBox<String[]>();
+    protected String[] labelsInput = {"Aeroplane mass: ", "Minimal drag coefficient: ", "Maximum drag coeficient: ",
         "Air speed: ", "Minimal air speed: "};
-    SpinnerModel spinnerModelMass;
-    SpinnerModel spinnerModelLift;
-    SpinnerModel spinnerModelSpeed;
-    SpinnerModel spinnerModelMinSpeed;
-    SpinnerModel spinnerModelSpan;
-    SpinnerModel spinnerModelChord;
-    SpinnerModel spinnerModelEdge;
-    SpinnerModel spinnerModelIterNumber;
-    String[] labelsInitVar = {"Span: ", "Chord: ", "Leading edge: ",};
+    protected SpinnerModel spinnerModelMass;
+    protected SpinnerModel spinnerModelLift;
+    protected SpinnerModel spinnerModelSpeed;
+    protected SpinnerModel spinnerModelMinSpeed;
+    protected SpinnerModel spinnerModelSpan;
+    protected SpinnerModel spinnerModelChord;
+    protected SpinnerModel spinnerModelEdge;
+    protected SpinnerModel spinnerModelIterNumber;
+    protected String[] labelsInitVar = {"Span: ", "Chord: ", "Leading edge: ",};
 
-    NewIteration() {
-
+    protected MarsClient client;
+    
+    public NewIteration(MarsClient client) {
+    	super();
+    	this.client = client;
         spinnerModelMass = new SpinnerNumberModel(500, //initial value
                 0, //min
                 5000, //max
@@ -152,7 +154,7 @@ public class NewIteration extends JPanel {
         add(panelButton);
     }
 
-    static protected JSpinner addLabeledSpinner(Container c, String label, SpinnerModel model) {
+    protected static JSpinner addLabeledSpinner(Container c, String label, SpinnerModel model) {
         JLabel l = new JLabel(label);
         c.add(l);
 
@@ -185,6 +187,7 @@ public class NewIteration extends JPanel {
             inputs.put(labelsInitVar[2], Double.parseDouble( spinnerModelLift.getValue().toString()));
             inputs.put("Iteration Number", Double.parseDouble(spinnerModelIterNumber.getValue().toString()));
 
+            client.sendOptimizationInputs(inputs);
             System.out.println(inputs);
         }
     }

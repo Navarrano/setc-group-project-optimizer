@@ -5,6 +5,9 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -12,19 +15,24 @@ import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 
+import cranfield.group.project.airfoil.client.MarsClient;
+
 /**
  *
  * @author Kat
  */
 public class MainFrame {
-    JFrame frame = new JFrame("Randomly Selected");
-    final JPanel contentPane = new JPanel();
-           
-    MainFrame() {
+	
+    protected JFrame frame = new JFrame("Randomly Selected");
+    protected final JPanel contentPane = new JPanel();
+    protected MarsClient client;
 
+    public MainFrame(MarsClient client) {
+
+    	this.client = client;
         contentPane.setLayout(new CardLayout(300, 250));
         
-        NewIteration newIter = new NewIteration();
+        NewIteration newIter = new NewIteration(client);
         contentPane.add(newIter);
         ShowLogs showlogs = new ShowLogs();
         contentPane.add(showlogs,"2");
@@ -36,6 +44,8 @@ public class MainFrame {
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
+        
+        actionClosingWindow();
     }
 
     private void createMenuBar() {
@@ -71,6 +81,16 @@ public class MainFrame {
         frame.setJMenuBar(menubar);
     }
 
+    private void actionClosingWindow(){
+    	// Add Listener on the close-window button
+    	frame.addWindowListener(new WindowAdapter() {
+    		public void windowClosing(WindowEvent e) {
+    			// Terminate the socket connection with the server
+    			client.terminateConnection();
+    		}
+    	});
+    }
+    
     class IterActionListener implements ActionListener {
 
         public void actionPerformed(ActionEvent e) {

@@ -1,24 +1,25 @@
 package cranfield.group.project.airfoil.client.view;
 
 import javax.swing.*;
+
+import cranfield.group.project.airfoil.client.MarsClient;
+
 import java.awt.*;
 import java.awt.event.*;
 
 public class Log extends JFrame {
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        Log frameTabel = new Log();
-    }
-    JButton blogin = new JButton("Login");
-    JPanel panel = new JPanel();
-    JTextField txuser = new JTextField(15);
-    JPasswordField pass = new JPasswordField(15);
-
+    private JButton blogin = new JButton("Login");
+    private JPanel panel = new JPanel();
+    private JTextField txuser = new JTextField(15);
+    private JPasswordField pass = new JPasswordField(15);
+    private MarsClient client;
+    
     public Log() {
-        super("Login Autentification");
+        super("Login Authentification");
+        
+        client = new MarsClient("localhost",6066);
+        
         setSize(300, 200);
         setLocation(500, 280);
         panel.setLayout(null);
@@ -35,6 +36,7 @@ public class Log extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
         actionlogin();
+        actionClosingWindow();
     }
 
     public void actionlogin() {
@@ -42,9 +44,9 @@ public class Log extends JFrame {
             public void actionPerformed(ActionEvent ae) {
                 String puname = txuser.getText();
                 String ppaswd = pass.getText();
-                if (puname.equals("test") && ppaswd.equals("12345")) {
-                    MainFrame frame = new MainFrame();
-                    frame.contentPane.setVisible(true);
+                if(client.areValidatedCredentials(puname, ppaswd)){
+                	MainFrame frame = new MainFrame(client);
+                	frame.contentPane.setVisible(true);
                     dispose();
                 } else {
 
@@ -56,6 +58,16 @@ public class Log extends JFrame {
 
             }
         });
+    }
+    
+    public void actionClosingWindow(){
+    	// Add Listener on the close-window button
+    	addWindowListener(new WindowAdapter() {
+    		public void windowClosing(WindowEvent e) {
+    			// Terminate the socket connection with the server
+    			client.terminateConnection();
+    		}
+    	});
     }
 }
 

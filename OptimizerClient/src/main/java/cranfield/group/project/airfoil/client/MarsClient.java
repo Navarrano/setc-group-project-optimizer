@@ -1,6 +1,7 @@
 package cranfield.group.project.airfoil.client;
 
 import java.net.*;
+import java.util.Hashtable;
 import java.io.*;
 
 public class MarsClient
@@ -46,14 +47,27 @@ public class MarsClient
    }
    
    public void terminateConnection(){
-	   String quitString[]={"quit"};
+	   String messageForServerAction[]={"quit"};
 	   try {
 		   ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
-		   out.writeObject(quitString);
+		   out.writeObject(messageForServerAction);
 		   clientSocket.close();
 	   } catch (IOException e) {
 		   // TODO Auto-generated catch block
 		   e.printStackTrace();
 	   }
    }
+
+   public void sendOptimizationInputs(Hashtable<String, Double> inputs) {
+	   String messageForServerAction[]={"optimization"};
+	   try {
+		   ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
+		   out.writeObject(messageForServerAction);
+		   out.writeObject(inputs);
+		   clientSocket.close();
+	   } catch (IOException e) {
+		   // TODO Auto-generated catch block
+		   e.printStackTrace();
+	   }
+	}
 }
