@@ -1,4 +1,4 @@
-package cranfield.group.project.airfoil.server.models.entities;
+package cranfield.group.project.airfoil.server.entities;
 
 import java.io.Serializable;
 

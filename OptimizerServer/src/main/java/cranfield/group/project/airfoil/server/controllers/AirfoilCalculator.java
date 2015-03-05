@@ -1,4 +1,4 @@
-package cranfield.group.project.airfoil.server.services;
+package cranfield.group.project.airfoil.server.controllers;
 
 public class AirfoilCalculator {
 
