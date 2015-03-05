@@ -1,39 +1,40 @@
 package cranfield.group.project.airfoil.client;
 
-import java.net.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 
-public class MarsClient
-{
+public class MarsClient implements AutoCloseable {
 	private Socket clientSocket;
-   
-	public MarsClient(String serverName, Integer port){
+
+	public MarsClient(String serverName, Integer port) throws IOException {
+		clientSocket = new Socket(serverName, port);
+		System.out.println("CLIENT : Just connected to "
+				+ clientSocket.getRemoteSocketAddress());
+	}
+
+	public boolean isConnected() {
+		return clientSocket.isConnected();
+	}
+
+	public boolean areValidatedCredentials(String username, String password) {
+		boolean areValidatedCredentials = false;
+		String credentials[] = { "credentials", username, password };
 		try {
-			clientSocket = new Socket(serverName, port);
-			System.out.println("CLIENT : Just connected to "
-			                   + clientSocket.getRemoteSocketAddress());
+			ObjectOutputStream out = new ObjectOutputStream(
+					clientSocket.getOutputStream());
+			out.writeObject(credentials);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-   }
-   
-   public boolean areValidatedCredentials(String username, String password){
-	   boolean areValidatedCredentials = false;
-	   String credentials[]={"credentials",username,password};
-	   try {
-		ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
-		out.writeObject(credentials);
-	   } catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	   }
-	   
-	   ObjectInputStream in;
-	   try {
+
+		ObjectInputStream in;
+		try {
 			in = new ObjectInputStream(clientSocket.getInputStream());
-		    areValidatedCredentials = (boolean)in.readObject();
-		    System.out.println("here!");
+			areValidatedCredentials = (boolean) in.readObject();
+			System.out.println("here!");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -41,19 +42,25 @@ public class MarsClient
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	   
-	   return areValidatedCredentials;
-   }
-   
-   public void terminateConnection(){
-	   String quitString[]={"quit"};
-	   try {
-		   ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
-		   out.writeObject(quitString);
-		   clientSocket.close();
-	   } catch (IOException e) {
-		   // TODO Auto-generated catch block
-		   e.printStackTrace();
-	   }
-   }
+
+		return areValidatedCredentials;
+	}
+
+	@Override
+	public void close() throws Exception {
+		terminateConnection();
+	}
+
+	public void terminateConnection() {
+		String quitString[] = { "quit" };
+		try {
+			ObjectOutputStream out = new ObjectOutputStream(
+					clientSocket.getOutputStream());
+			out.writeObject(quitString);
+			clientSocket.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }
