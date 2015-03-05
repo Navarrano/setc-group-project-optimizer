@@ -1,7 +1,9 @@
 package cranfield.group.project.airfoil.client.view;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -10,6 +12,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -29,8 +33,9 @@ public class AuthenticationFrame extends JFrame {
 	private final JButton loginButton = new JButton("Login");
 	private final JTextField txuser = new JTextField(20);
 	private final JPasswordField pass = new JPasswordField(20);
-	JLabel errorLabel = new JLabel("Unable to connect with server!");
+	JLabel errorLabel = new JLabel(" ");
 
+	private static final String errorMsg = "Unable to connect with server! Click here to change server URL";
 	private String host;
 	private int port;
 
@@ -39,15 +44,15 @@ public class AuthenticationFrame extends JFrame {
 		this.host = host;
 		this.port = port;
 
-		setSize(400, 200);
-		setLocation(500, 280);
+		setSize(500, 150);
+		setLocationRelativeTo(null);
+		setResizable(false);
+		// setLocation(500, 280);
 
 		initComponents();
 		initConnection(host, port);
 
-		getContentPane().add(panel);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setVisible(true);
 
         // Add Listener on the close-window button
         addWindowListener(new WindowAdapter() {
@@ -57,39 +62,59 @@ public class AuthenticationFrame extends JFrame {
 					client.terminateConnection();
             }
         });
+		pack();
     }
 
 	private void initConnection(String host, int port) {
 		try {
 			client = new MarsClient(host, port);
 			loginButton.setEnabled(true);
-			errorLabel.setVisible(false);
+			errorLabel.setText(" ");
 		} catch (IOException e) {
 			loginButton.setEnabled(false);
-			errorLabel.setVisible(true);
+			errorLabel.setText(errorMsg);
 		}
 	}
 
 	private void initComponents() {
-		panel.setLayout(null);
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		panel.add(Box.createVerticalStrut(10));
 
 		errorLabel.setForeground(Color.RED);
-		errorLabel.setVisible(false);
+		errorLabel.setFont(errorLabel.getFont().deriveFont(Font.BOLD));
 		errorLabel.addMouseListener(new ErrorLabelMouseAdapter(this));
+		errorLabel.setAlignmentX(CENTER_ALIGNMENT);
+		panel.add(errorLabel);
+		panel.add(Box.createVerticalStrut(10));
 
+		JPanel firstRow = new JPanel();
+		firstRow.setLayout(new BoxLayout(firstRow, BoxLayout.X_AXIS));
+		firstRow.add(Box.createHorizontalStrut(20));
+		firstRow.add(new JLabel("Username: "));
+		firstRow.add(txuser);
+		firstRow.add(Box.createHorizontalStrut(20));
+		panel.add(firstRow);
+		panel.add(Box.createVerticalStrut(10));
+
+		JPanel secondRow = new JPanel();
+		secondRow.setLayout(new BoxLayout(secondRow, BoxLayout.X_AXIS));
+		secondRow.add(Box.createHorizontalStrut(20));
+		secondRow.add(new JLabel("Password: "));
+		secondRow.add(pass);
+		secondRow.add(Box.createHorizontalStrut(20));
+		panel.add(secondRow);
+		panel.add(Box.createVerticalStrut(10));
 
 		loginButton.addActionListener(new LoginButtonLister());
-
-		errorLabel.setBounds(55, 5, 180, 20);
-		txuser.setBounds(70, 30, 150, 20);
-		pass.setBounds(70, 65, 150, 20);
-		loginButton.setBounds(110, 100, 80, 20);
-
-		panel.add(errorLabel);
+		loginButton.setAlignmentX(CENTER_ALIGNMENT);
+		loginButton.setEnabled(false);
 		panel.add(loginButton);
-		panel.add(txuser);
-		panel.add(pass);
+		panel.add(Box.createVerticalStrut(10));
 
+		getContentPane().add(Box.createHorizontalStrut(50), BorderLayout.LINE_START);
+		getContentPane().add(panel, BorderLayout.CENTER);
+		getContentPane().add(Box.createHorizontalStrut(50),
+				BorderLayout.LINE_END);
 	}
 
 	private class ErrorLabelMouseAdapter extends MouseAdapter {
