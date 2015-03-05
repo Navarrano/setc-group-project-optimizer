@@ -1,6 +1,7 @@
 package cranfield.group.project.airfoil.client;
 
 import java.io.IOException;
+import java.util.Hashtable;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -62,5 +63,18 @@ public class MarsClient implements AutoCloseable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+   public void sendOptimizationInputs(Hashtable<String, Double> inputs) {
+	   String messageForServerAction[]={"optimization"};
+	   try {
+		   ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
+		   out.writeObject(messageForServerAction);
+		   out.writeObject(inputs);
+		   clientSocket.close();
+	   } catch (IOException e) {
+		   // TODO Auto-generated catch block
+		   e.printStackTrace();
+	   }
 	}
 }

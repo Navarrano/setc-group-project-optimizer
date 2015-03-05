@@ -133,8 +133,8 @@ public class AuthenticationFrame extends JFrame {
 			String ppaswd = new String(password);
 			password = null;
 			if (client.areValidatedCredentials(puname, ppaswd)) {
-				DesciptionFrame regFace = new DesciptionFrame(client);
-				regFace.setVisible(true);
+				MainFrame mainFrame = new MainFrame(client);
+				//regFace.setVisible(true);
 				dispose();
 			} else {
 				JOptionPane

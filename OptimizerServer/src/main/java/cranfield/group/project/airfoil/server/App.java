@@ -10,10 +10,10 @@ public class App
 {
 	   public static void main(String [] args)
 	   {
-	      int port = Integer.parseInt(args[0]);
+		// int port = Integer.parseInt(args[0]);
 	      try
 	      {
-	         Thread t = new MarsServer(port);
+			Thread t = new MarsServer(6066);
 	         t.start();
 	      }catch(IOException e)
 	      {
