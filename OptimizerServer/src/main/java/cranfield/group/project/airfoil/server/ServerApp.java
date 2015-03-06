@@ -26,7 +26,6 @@ public class ServerApp {
 				System.out.println("SERVER : Just connected to "
 						+ client.getRemoteSocketAddress());
 				new Thread(new MarsServer(client, connectedUsers)).start();
-				System.out.println("SERVER: connected");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

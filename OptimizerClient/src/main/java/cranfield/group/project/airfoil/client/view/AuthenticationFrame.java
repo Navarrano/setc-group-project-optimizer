@@ -143,7 +143,7 @@ public class AuthenticationFrame extends JFrame {
 				host = hostField.getText();
 				try {
 					port = Integer.parseInt(portField.getText());
-					initConnection(host, result);
+					initConnection(host, port);
 				} catch (NumberFormatException ex) {
 					errorLabel.setText("Port must be a number");
 				}

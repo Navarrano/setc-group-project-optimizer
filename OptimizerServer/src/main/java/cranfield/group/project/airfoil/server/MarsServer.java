@@ -20,6 +20,7 @@ public class MarsServer extends Thread {
 	/** The server socket */
 	protected Socket client;
 	protected Set<String> connectedUsers;
+	protected String username;
 
 	/** The database handler. */
 	// protected DatabaseHandler databaseHandler;
@@ -35,35 +36,36 @@ public class MarsServer extends Thread {
 	 * @see java.lang.Thread#run()
 	 */
 	public void run() {
-			try {
-				boolean isClientConnected = true;
+		try {
+			boolean isClientConnected = true;
 
-				while (isClientConnected) {
-					ObjectInputStream in = new ObjectInputStream(
-							client.getInputStream());
+			while (isClientConnected) {
+				ObjectInputStream in = new ObjectInputStream(
+						client.getInputStream());
 
-					String[] dataFromClient = (String[]) in.readObject();
+				String[] dataFromClient = (String[]) in.readObject();
 
-					switch (dataFromClient[0]) {
-					case "credentials":
-						validateConnection(client, dataFromClient);
-						break;
-					case "quit":
-						isClientConnected = false;
-						client.close();
-						break;
-					}
+				switch (dataFromClient[0]) {
+				case "credentials":
+					validateConnection(client, dataFromClient);
+					break;
+				case "quit":
+					connectedUsers.remove(username);
+					isClientConnected = false;
+					client.close();
+					break;
 				}
-
-			} catch (SocketTimeoutException s) {
-				System.out.println("SERVER : Socket timed out!");
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
+
+		} catch (SocketTimeoutException s) {
+			System.out.println("SERVER : Socket timed out!");
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -146,6 +148,7 @@ public class MarsServer extends Thread {
 					+ "\" is already connected with server";
 		try (AstralConnection astralConnection = new AstralConnection(
 				credentials[1], credentials[2])) {
+			username = credentials[1];
 			connectedUsers.add(credentials[1]);
 		} catch (JSchException e) {
 			return e.getMessage();
