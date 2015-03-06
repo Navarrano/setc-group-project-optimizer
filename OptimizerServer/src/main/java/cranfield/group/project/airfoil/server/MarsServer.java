@@ -6,6 +6,7 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.Hashtable;
 
 import com.jcraft.jsch.JSchException;
 
@@ -66,6 +67,10 @@ public class MarsServer extends Thread {
 					case "credentials":
 						validateConnection(server, dataFromClient);
 						break;
+					case "optimization":
+						Hashtable<String, Double> inputValues = (Hashtable<String, Double>) in.readObject();
+						System.out.println(inputValues.toString());
+
 					case "quit":
 						isClientConnected = false;
 						server.close();
