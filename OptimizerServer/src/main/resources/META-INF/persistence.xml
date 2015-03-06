@@ -15,6 +15,9 @@
 			<property name="eclipselink.ddl-generation.output-mode"
 				value="database" />
 		</properties>
-                <class>cranfield.setc.project.models.entities.AstralUser</class>
+                <class>cranfield.group.project.airfoil.server.entities.AstralUser</class>
+                <class>cranfield.group.project.airfoil.server.entities.Logs</class>
+                <class>cranfield.group.project.airfoil.server.entities.Results</class>
+                <class>cranfield.group.project.airfoil.server.entities.Workflow</class>
 	</persistence-unit>
 </persistence>

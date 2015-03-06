@@ -11,6 +11,10 @@ import java.util.Set;
 import com.jcraft.jsch.JSchException;
 
 import cranfield.group.project.airfoil.server.controllers.AstralConnection;
+import cranfield.group.project.airfoil.server.entities.AstralUser;
+import cranfield.group.project.airfoil.server.entities.Logs;
+import cranfield.group.project.airfoil.server.services.LogsCRUDService;
+import cranfield.group.project.airfoil.server.services.UserCRUDService;
 
 /**
  * The Class MarsServer. Represents the entry point of the server, that handles
@@ -25,10 +29,14 @@ public class MarsServer extends Thread {
 
 	/** The database handler. */
 	// protected DatabaseHandler databaseHandler;
+         protected UserCRUDService astralUser;
+         protected LogsCRUDService logs;
 
 	public MarsServer(Socket client, Set<String> users) {
 		this.client = client;
 		this.connectedUsers = users;
+                logs = new LogsCRUDService();
+                astralUser = new UserCRUDService();
 	}
 
 	/*
@@ -96,11 +104,16 @@ public class MarsServer extends Thread {
 				writeUserInformationInDatabase(credentials[1]);
 				// databaseHandler.addEventLog("Connection granted : username "
 				// + credentials[1], "info", "connection");
+                                logs.addEventLog(new Logs("Connection granted : username "
+                                                + credentials[1], "info", "connection"));
+				
 				System.out.println("Good credentials");
 			} else {
 				out.writeObject(msg);
 				// databaseHandler.addEventLog("Connection denied : username "
 				// + credentials[1], "error", "connection");
+                                 logs.addEventLog(new Logs("Connection denied : username "
+                                                 + credentials[1], "error", "connection"));
 				System.out.println("Wrong credentials");
 			}
 		} catch (IOException e) {
@@ -125,6 +138,13 @@ public class MarsServer extends Thread {
 		// databaseHandler.addEventLog("User " + username
 		// + " added to AstralUsers table.", "info", "database");
 		// }
+                if (astralUser.existsUser(username)) {
+                    astralUser.updateUserConnectionInformation(new AstralUser(username));
+		} else {
+                    astralUser.addNewUser(new AstralUser(username));
+                    logs.addEventLog(new Logs("User " + username
+                                              + " added to AstralUsers table.", "info", "database"));
+		}
 	}
 
 	/**

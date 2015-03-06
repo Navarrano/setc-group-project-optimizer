@@ -1,9 +1,13 @@
 package cranfield.group.project.airfoil.server.entities;
 
+import java.io.Serializable;
+import java.sql.Timestamp;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 /**
@@ -12,18 +16,24 @@ import javax.persistence.Table;
  */
 @Entity
 @Table
-public class AstralUser extends AbstractEntityObject<Long, AstralUser>{
+@NamedQueries({
+    @NamedQuery(name="existingUser", query = "FROM AstralUser u WHERE u.login=:login")
+})
+public class AstralUser extends AbstractEntityObject<Long, AstralUser> implements Serializable{
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String login;
+    private Timestamp last_connection_date;
+    private int nb_connections;
 
     public AstralUser(){}
     
-    public AstralUser(Long id, String login) {
-        this.id = id;
+    public AstralUser(String login) {
         this.login = login;
+        this.last_connection_date = new Timestamp(new java.util.Date().getTime());
+        this.nb_connections = 1;
     }
 
     public Long getId() {
@@ -40,5 +50,21 @@ public class AstralUser extends AbstractEntityObject<Long, AstralUser>{
 
     public void setLogin(String login) {
         this.login = login;
+    }
+    
+    public Timestamp getLast_connection_date() {
+        return last_connection_date;
+    }
+
+    public void setLast_connection_date(Timestamp last_connection_date) {
+        this.last_connection_date = last_connection_date;
+    }
+    
+    public int getNb_connections() {
+        return nb_connections;
+    }
+
+    public void setNb_connections(int nb_connections) {
+        this.nb_connections = nb_connections;
     }
 }
