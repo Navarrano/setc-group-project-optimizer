@@ -23,4 +23,11 @@ public class Results extends AbstractEntityObject<Long, Results>{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private int iteration;
+    private double angle;
+    private double chord;
+    private double span;
+	private double dragForce;
+	private double liftForce;
+    private double ratio;
 }

@@ -23,6 +23,14 @@ public class Workflow extends AbstractEntityObject<Long, Workflow>{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    
+    private int nbIterations;
+    private double minDragCoef;
+    private double aeroplaneMass;
+    private double maxLiftCoef;
+    private double airSpeed;
+    private double minAirSpeed;
+    private double angle;
+    private double chord;
+    private double span;
+   
 }
