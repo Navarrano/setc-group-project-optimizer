@@ -5,11 +5,19 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.Hashtable;
 import java.util.Set;
+import java.util.Vector;
 
 import com.jcraft.jsch.JSchException;
+import cranfield.group.project.airfoil.api.model.IterationValuesSet;
 
+import cranfield.group.project.airfoil.server.controllers.AirfoilCalculator;
 import cranfield.group.project.airfoil.server.controllers.AstralConnection;
+import cranfield.group.project.airfoil.server.entities.AstralUser;
+import cranfield.group.project.airfoil.server.entities.Logs;
+import cranfield.group.project.airfoil.server.services.LogsCRUDService;
+import cranfield.group.project.airfoil.server.services.UserCRUDService;
 
 /**
  * The Class MarsServer. Represents the entry point of the server, that handles
@@ -24,10 +32,14 @@ public class MarsServer extends Thread {
 
 	/** The database handler. */
 	// protected DatabaseHandler databaseHandler;
+         protected UserCRUDService astralUser;
+         protected LogsCRUDService logs;
 
 	public MarsServer(Socket client, Set<String> users) {
 		this.client = client;
 		this.connectedUsers = users;
+                logs = new LogsCRUDService();
+                astralUser = new UserCRUDService();
 	}
 
 	/*
@@ -49,6 +61,12 @@ public class MarsServer extends Thread {
 				case "credentials":
 					validateConnection(client, dataFromClient);
 					break;
+				case "optimization":
+					Hashtable<String, Double> inputValues = (Hashtable<String, Double>) in.readObject();
+					runOptimization(client,inputValues);
+					System.out.println(inputValues.toString());
+					System.out.println(inputValues.get("Span: "));
+					break;
 				case "quit":
 					connectedUsers.remove(username);
 					isClientConnected = false;
@@ -62,6 +80,31 @@ public class MarsServer extends Thread {
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	private void runOptimization(Socket server, Hashtable<String, Double> inputValues) {
+		double minDragCoef = inputValues.get("Minimal drag coefficient: ");
+		double aeroPlaneMass = inputValues.get("Aeroplane mass: ");
+		double maxLiftCoef = inputValues.get("Maximum lift coeficient: ");
+		double airSpeed = inputValues.get("Air speed: ");
+		double minAirSpeed = inputValues.get("Minimal air speed: ");
+		
+		double span = inputValues.get("Span: ");
+		double chord = inputValues.get("Chord: ");
+		int nbIterations = inputValues.get("Iteration Number").intValue();
+		double leadingEdge = inputValues.get("Leading edge: ");
+		
+		AirfoilCalculator calculator = new AirfoilCalculator(0.0267, 3523, 1.78, 120.11, 46.18);
+		calculator.optimize(20, 20, 0, 2);
+		Vector<IterationValuesSet> optimizationResults = calculator.getIterationsValuesSet();
+		try {
+			ObjectOutputStream out = new ObjectOutputStream(server.getOutputStream());
+			out.writeObject(optimizationResults);
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -92,11 +135,16 @@ public class MarsServer extends Thread {
 				writeUserInformationInDatabase(credentials[1]);
 				// databaseHandler.addEventLog("Connection granted : username "
 				// + credentials[1], "info", "connection");
+                                logs.addEventLog(new Logs("Connection granted : username "
+                                                + credentials[1], "info", "connection"));
+				
 				System.out.println("Good credentials");
 			} else {
 				out.writeObject(msg);
 				// databaseHandler.addEventLog("Connection denied : username "
 				// + credentials[1], "error", "connection");
+                                 logs.addEventLog(new Logs("Connection denied : username "
+                                                 + credentials[1], "error", "connection"));
 				System.out.println("Wrong credentials");
 			}
 		} catch (IOException e) {
@@ -121,6 +169,13 @@ public class MarsServer extends Thread {
 		// databaseHandler.addEventLog("User " + username
 		// + " added to AstralUsers table.", "info", "database");
 		// }
+                if (astralUser.existsUser(username)) {
+                    astralUser.updateUserConnectionInformation(new AstralUser(username));
+		} else {
+                    astralUser.addNewUser(new AstralUser(username));
+                    logs.addEventLog(new Logs("User " + username
+                                              + " added to AstralUsers table.", "info", "database"));
+		}
 	}
 
 	/**

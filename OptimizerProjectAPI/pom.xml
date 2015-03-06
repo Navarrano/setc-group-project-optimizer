@@ -7,17 +7,12 @@
     <artifactId>OptimizerProject</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>OptimizerClient</artifactId>
-  <name>OptimizerClient</name>
+  <groupId>cranfield.group.project.airfoil</groupId>
+  <artifactId>OptimizerProjectAPI</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>OptimizerProjectAPI</name>
   <url>http://maven.apache.org</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-  <dependencies>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>OptimizerProjectAPI</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-  </dependencies>
 </project>

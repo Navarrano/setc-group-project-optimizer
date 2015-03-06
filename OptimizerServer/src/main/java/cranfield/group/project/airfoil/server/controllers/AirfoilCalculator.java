@@ -1,8 +1,9 @@
 package cranfield.group.project.airfoil.server.controllers;
 
+import cranfield.group.project.airfoil.api.model.IterationValuesSet;
 import java.util.Vector;
 
-import cranfield.group.project.airfoil.server.models.IterationValuesSet;
+
 
 public class AirfoilCalculator {
 
@@ -47,7 +48,7 @@ public class AirfoilCalculator {
 			System.out.format(
 "%d ==> Drag force: %.4f, Lift force: %.4f, RATIO: %.8f, b: %.3f c: %.3f Angle: %.8f\n",
 							i, dragForce, liftForce, ratio, b, c, angle);
-			iterationsValuesSet.add(new IterationValuesSet(i+1,dragForce,liftForce,angle,ratio));
+			iterationsValuesSet.add(new IterationValuesSet(i+1,c,b,angle,dragForce,liftForce,ratio));
 			b = b - STEP_SIZE
 					* calcNumericalDerivativeByB(oldB, oldC, angle, deltaB);
 			c = c - STEP_SIZE
@@ -125,5 +126,10 @@ public class AirfoilCalculator {
 	private double calcLiftCoeff(double b, double c, double v) {
 		return 2 * calcMass(b, c) * GRAVITATIONAL_ACCELERATION
 				/ (AIR_DENSITY * calcBearingSurface(b, c) * v * v);
+	}
+	
+	public static void main(String[] args) {
+		AirfoilCalculator calculator = new AirfoilCalculator(0.0267, 3523, 1.78, 120.11, 46.18);
+		calculator.optimize(20, 20, 0, 500);
 	}
 }
