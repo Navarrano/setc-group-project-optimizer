@@ -2,9 +2,12 @@ package cranfield.group.project.airfoil.server.gui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,7 +23,7 @@ import cranfield.group.project.airfoil.server.MarsServer;
 
 public class MainFrame extends JFrame {
 
-	private Thread serverThread;
+	private ServerSocketThread serverThread;
 	private Set<String> connectedUsers = new HashSet<>();
 
 	public MainFrame() {
@@ -30,8 +33,20 @@ public class MainFrame extends JFrame {
 		pack();
 		setLocationRelativeTo(null);
 
-		serverThread = new Thread(new ServerSocketRunnable());
+		serverThread = new ServerSocketThread();
 		serverThread.start();
+
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		// Add Listener on the close-window button
+		addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				// Terminate the socket connection with the server
+				if (serverThread != null) {
+					serverThread.interrupt();
+					System.out.println("Thread stopped");
+				}
+			}
+		});
 	}
 
 	private void initComponents() {
@@ -67,18 +82,25 @@ public class MainFrame extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 			if (toggleButton.isSelected()) {
 				toggleButton.setText("Stop server");
+				serverThread = new ServerSocketThread();
+				serverThread.start();
 			} else {
 				toggleButton.setText("Start server");
+				serverThread.interrupt();
+				serverThread = null;
 			}
 
 		}
 	}
 
-	private class ServerSocketRunnable implements Runnable {
+	private class ServerSocketThread extends Thread {
 
 		private static final int PORT = 6066;
-
 		private ServerSocket socket;
+
+		public ServerSocketThread() {
+			super("Server thread");
+		}
 
 		@Override
 		public void run() {
@@ -93,6 +115,8 @@ public class MainFrame extends JFrame {
 							+ client.getRemoteSocketAddress());
 					new Thread(new MarsServer(client, connectedUsers)).start();
 				}
+			} catch (SocketException e) {
+				// DO NOTHING
 			} catch (IOException e) {
 				e.printStackTrace();
 			} finally {
@@ -104,6 +128,19 @@ public class MainFrame extends JFrame {
 					}
 				}
 
+			}
+		}
+
+		@Override
+		public void interrupt() {
+			super.interrupt();
+			try {
+				if (socket != null && !socket.isClosed()) {
+					socket.close();
+					System.out.println("SERVER: Socket has been closed");
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 	}
