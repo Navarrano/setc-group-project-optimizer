@@ -6,6 +6,8 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
@@ -100,6 +102,9 @@ public class AuthenticationFrame extends JFrame {
 		secondRow.setLayout(new BoxLayout(secondRow, BoxLayout.X_AXIS));
 		secondRow.add(Box.createHorizontalStrut(20));
 		secondRow.add(new JLabel("Password: "));
+
+		pass.addKeyListener(new PasswordKeyAdapter());
+
 		secondRow.add(pass);
 		secondRow.add(Box.createHorizontalStrut(20));
 		panel.add(secondRow);
@@ -116,6 +121,16 @@ public class AuthenticationFrame extends JFrame {
 		getContentPane().add(panel, BorderLayout.CENTER);
 		getContentPane().add(Box.createHorizontalStrut(50),
 				BorderLayout.LINE_END);
+	}
+
+	private class PasswordKeyAdapter extends KeyAdapter {
+		@Override
+		public void keyPressed(KeyEvent e) {
+			if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+				if (loginButton.isEnabled())
+					loginButton.doClick();
+			}
+		}
 	}
 
 	private class ErrorLabelMouseAdapter extends MouseAdapter {

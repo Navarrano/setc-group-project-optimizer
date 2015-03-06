@@ -15,7 +15,7 @@ public class ClientApp
 			@Override
 			public void run() {
 				AuthenticationFrame frame = new AuthenticationFrame(
-						"localhost", 6065);
+						"localhost", 6066);
 				frame.setVisible(true);
 			}
 		});
