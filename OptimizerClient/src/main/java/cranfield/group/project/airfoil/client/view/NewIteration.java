@@ -27,7 +27,7 @@ public class NewIteration extends JPanel {
     protected JPanel panelButton = new JPanel();
     protected JPanel panelComboBox = new JPanel();
     protected JComboBox<String[]> comboDragCoeff = new JComboBox<String[]>();
-    protected String[] labelsInput = {"Aeroplane mass: ", "Minimal drag coefficient: ", "Maximum drag coeficient: ",
+    protected String[] labelsInput = {"Aeroplane mass: ", "Minimal drag coefficient: ", "Maximum lift coeficient: ",
         "Air speed: ", "Minimal air speed: "};
     protected SpinnerModel spinnerModelMass;
     protected SpinnerModel spinnerModelLift;
@@ -188,7 +188,7 @@ public class NewIteration extends JPanel {
             inputs.put("Iteration Number", Double.parseDouble(spinnerModelIterNumber.getValue().toString()));
 
             client.sendOptimizationInputs(inputs);
-            System.out.println(inputs);
+            client.receiveOptimizationOutputs();
         }
     }
 

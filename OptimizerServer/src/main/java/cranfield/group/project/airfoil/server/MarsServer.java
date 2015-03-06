@@ -7,9 +7,12 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.Hashtable;
 import java.util.Set;
+import java.util.Vector;
 
 import com.jcraft.jsch.JSchException;
 
+import cranfield.group.project.airfoil.client.models.IterationValuesSet;
+import cranfield.group.project.airfoil.server.controllers.AirfoilCalculator;
 import cranfield.group.project.airfoil.server.controllers.AstralConnection;
 
 /**
@@ -52,7 +55,10 @@ public class MarsServer extends Thread {
 					break;
 				case "optimization":
 					Hashtable<String, Double> inputValues = (Hashtable<String, Double>) in.readObject();
+					runOptimization(client,inputValues);
 					System.out.println(inputValues.toString());
+					System.out.println(inputValues.get("Span: "));
+					break;
 				case "quit":
 					connectedUsers.remove(username);
 					isClientConnected = false;
@@ -66,6 +72,31 @@ public class MarsServer extends Thread {
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	private void runOptimization(Socket server, Hashtable<String, Double> inputValues) {
+		double minDragCoef = inputValues.get("Minimal drag coefficient: ");
+		double aeroPlaneMass = inputValues.get("Aeroplane mass: ");
+		double maxLiftCoef = inputValues.get("Maximum lift coeficient: ");
+		double airSpeed = inputValues.get("Air speed: ");
+		double minAirSpeed = inputValues.get("Minimal air speed: ");
+		
+		double span = inputValues.get("Span: ");
+		double chord = inputValues.get("Chord: ");
+		int nbIterations = inputValues.get("Iteration Number").intValue();
+		double leadingEdge = inputValues.get("Leading edge: ");
+		
+		AirfoilCalculator calculator = new AirfoilCalculator(0.0267, 3523, 1.78, 120.11, 46.18);
+		calculator.optimize(20, 20, 0, 2);
+		Vector<IterationValuesSet> optimizationResults = calculator.getIterationsValuesSet();
+		try {
+			ObjectOutputStream out = new ObjectOutputStream(server.getOutputStream());
+			out.writeObject(optimizationResults);
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
