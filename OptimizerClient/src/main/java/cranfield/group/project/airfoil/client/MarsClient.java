@@ -1,10 +1,13 @@
 package cranfield.group.project.airfoil.client;
-
+ 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Hashtable;
+import java.util.Vector;
+
+import cranfield.group.project.airfoil.client.models.IterationValuesSet;
 
 public class MarsClient implements AutoCloseable {
 	private Socket clientSocket;
@@ -70,13 +73,30 @@ public class MarsClient implements AutoCloseable {
    public void sendOptimizationInputs(Hashtable<String, Double> inputs) {
 	   String messageForServerAction[]={"optimization"};
 	   try {
+		   System.out.println("Send Optimization inputs to Server");
 		   ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
 		   out.writeObject(messageForServerAction);
 		   out.writeObject(inputs);
-		   clientSocket.close();
 	   } catch (IOException e) {
 		   // TODO Auto-generated catch block
 		   e.printStackTrace();
 	   }
 	}
+
+   public void receiveOptimizationOutputs() {
+	   ObjectInputStream in;
+	   
+	   try {
+		   in = new ObjectInputStream(clientSocket.getInputStream());
+		   Vector<cranfield.group.project.airfoil.client.models.IterationValuesSet> optimizationResults = (Vector<IterationValuesSet>) in.readObject();
+		   System.out.println(optimizationResults.toString());
+	   } catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	   } catch (ClassNotFoundException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	   
+   }
 }
