@@ -18,7 +18,6 @@ public class AstralConnection implements AutoCloseable {
 	public AstralConnection(String username, String password)
 			throws JSchException {
 		JSch ssh = new JSch();
-		// JSch.setLogger(new MyLogger());
 
 		session = ssh.getSession(username, HOST, PORT);
 		session.setConfig("MaxAuthTries", "1");
@@ -93,26 +92,6 @@ public class AstralConnection implements AutoCloseable {
 
 		@Override
 		public void showMessage(String message) {
-		}
-	}
-
-	public static class MyLogger implements com.jcraft.jsch.Logger {
-		static java.util.Hashtable<Integer, String> name = new java.util.Hashtable<>();
-		static {
-			name.put(new Integer(DEBUG), "DEBUG: ");
-			name.put(new Integer(INFO), "INFO: ");
-			name.put(new Integer(WARN), "WARN: ");
-			name.put(new Integer(ERROR), "ERROR: ");
-			name.put(new Integer(FATAL), "FATAL: ");
-		}
-
-		public boolean isEnabled(int level) {
-			return true;
-		}
-
-		public void log(int level, String message) {
-			System.err.print(name.get(new Integer(level)));
-			System.err.println(message);
 		}
 	}
 }
