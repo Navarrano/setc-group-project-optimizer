@@ -8,6 +8,7 @@
   <modules>
     <module>OptimizerClient</module>
     <module>OptimizerServer</module>
+    <module>OptimizerProjectAPI</module>
   </modules>
     <dependencies>
     <dependency>

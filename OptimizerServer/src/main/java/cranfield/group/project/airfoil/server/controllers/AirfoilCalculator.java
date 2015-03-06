@@ -1,8 +1,8 @@
 package cranfield.group.project.airfoil.server.controllers;
 
+import cranfield.group.project.airfoil.api.model.IterationValuesSet;
 import java.util.Vector;
 
-import cranfield.group.project.airfoil.client.models.IterationValuesSet;
 
 
 public class AirfoilCalculator {

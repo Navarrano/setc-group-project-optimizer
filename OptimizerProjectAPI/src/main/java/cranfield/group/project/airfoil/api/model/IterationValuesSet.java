@@ -1,4 +1,4 @@
-package cranfield.group.project.airfoil.client.models;
+package cranfield.group.project.airfoil.api.model;
 
 import java.io.Serializable;
 

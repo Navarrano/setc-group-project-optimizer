@@ -10,8 +10,8 @@ import java.util.Set;
 import java.util.Vector;
 
 import com.jcraft.jsch.JSchException;
+import cranfield.group.project.airfoil.api.model.IterationValuesSet;
 
-import cranfield.group.project.airfoil.client.models.IterationValuesSet;
 import cranfield.group.project.airfoil.server.controllers.AirfoilCalculator;
 import cranfield.group.project.airfoil.server.controllers.AstralConnection;
 import cranfield.group.project.airfoil.server.entities.AstralUser;
