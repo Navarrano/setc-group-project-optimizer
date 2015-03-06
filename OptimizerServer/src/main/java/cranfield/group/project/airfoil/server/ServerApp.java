@@ -1,12 +1,10 @@
 package cranfield.group.project.airfoil.server;
 
-import cranfield.group.project.airfoil.server.services.EntityFactoryProvider;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.EntityManagerFactory;
 
 /**
  * Hello world!
@@ -18,7 +16,6 @@ public class ServerApp {
 
 	public static void main(String[] args) {
 		Set<String> connectedUsers = new HashSet<>();
-                EntityManagerFactory emf = EntityFactoryProvider.getInstance().createEntityManagerFactory();
 		ServerSocket socket = null;
 		try {
 			socket = new ServerSocket(PORT);
@@ -42,6 +39,5 @@ public class ServerApp {
 			}
 
 		}
-                emf.close();
 	}
 }
