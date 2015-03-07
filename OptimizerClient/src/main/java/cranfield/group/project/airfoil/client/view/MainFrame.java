@@ -16,6 +16,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 
 import cranfield.group.project.airfoil.client.MarsClient;
+import java.awt.Dimension;
 
 /**
  *
@@ -30,16 +31,17 @@ public class MainFrame {
     public MainFrame(MarsClient client) {
 
     	this.client = client;
-        contentPane.setLayout(new CardLayout(300, 250));
+        contentPane.setLayout(new CardLayout());
         
         NewIteration newIter = new NewIteration(client);
-        contentPane.add(newIter);
+        contentPane.add(newIter.panelComponent);
         ShowLogs showlogs = new ShowLogs();
         contentPane.add(showlogs,"2");
         DesciptionFrame newDesc = new DesciptionFrame();
         contentPane.add(newDesc);
         createMenuBar();
-        frame.add(contentPane, BorderLayout.CENTER);
+         frame.add(contentPane);
+        frame.setPreferredSize(new Dimension(720, 700));
         frame.pack();
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

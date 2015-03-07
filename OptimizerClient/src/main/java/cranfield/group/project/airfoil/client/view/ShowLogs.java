@@ -10,7 +10,7 @@ import javax.swing.border.Border;
  */
 public class ShowLogs extends JPanel{
     
-    ImageIcon icon = new ImageIcon("src/img/logo.png");
+    ImageIcon icon = new ImageIcon("img/logo.png");
     JLabel logo = new JLabel(icon);
     JTextArea textArea;
     JPanel panelTextField = new JPanel();
