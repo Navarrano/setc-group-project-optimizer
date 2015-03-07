@@ -22,6 +22,10 @@ public class IterationValuesSet implements Serializable {
 		this.ratio = ratio;
 	}
 	
+	public double getRatio(){
+		return this.ratio;
+	}
+	
 	@Override
 	public String toString(){
 		String res = "Nb Iterations: " + iteration + "\n";

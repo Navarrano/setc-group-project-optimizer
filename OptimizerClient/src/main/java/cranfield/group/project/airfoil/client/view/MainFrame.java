@@ -2,13 +2,11 @@ package cranfield.group.project.airfoil.client.view;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -36,9 +34,9 @@ public class MainFrame {
         NewIteration newIter = new NewIteration(client);
         contentPane.add(newIter.panelComponent);
         ShowLogs showlogs = new ShowLogs();
-        contentPane.add(showlogs,"2");
+        contentPane.add(showlogs.panelComponent,"2");
         DesciptionFrame newDesc = new DesciptionFrame();
-        contentPane.add(newDesc);
+        contentPane.add(newDesc.panelComponent);
         createMenuBar();
          frame.add(contentPane);
         frame.setPreferredSize(new Dimension(720, 700));

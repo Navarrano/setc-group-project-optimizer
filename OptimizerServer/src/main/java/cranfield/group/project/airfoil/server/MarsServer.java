@@ -87,7 +87,8 @@ public class MarsServer extends Thread {
 	}
 
 	private void runOptimization(Socket server, Hashtable<String, Double> inputValues) {
-		double minDragCoef = inputValues.get("Minimal drag coefficient: ");
+		//double minDragCoef = inputValues.get("Minimal drag coefficient: ");
+		double minDragCoef = 0.021;
 		double aeroPlaneMass = inputValues.get("Aeroplane mass: ");
 		double maxLiftCoef = inputValues.get("Maximum lift coeficient: ");
 		double airSpeed = inputValues.get("Air speed: ");
@@ -98,8 +99,9 @@ public class MarsServer extends Thread {
 		int nbIterations = inputValues.get("Iteration Number").intValue();
 		double leadingEdge = inputValues.get("Leading edge: ");
 		
-		AirfoilCalculator calculator = new AirfoilCalculator(0.0267, 3523, 1.78, 120.11, 46.18);
-		calculator.optimize(20, 20, 0, 2);
+		AirfoilCalculator calculator = new AirfoilCalculator(minDragCoef,aeroPlaneMass,maxLiftCoef,airSpeed,minAirSpeed);
+		calculator.optimize(span, chord, leadingEdge, nbIterations);
+		
 		Vector<IterationValuesSet> optimizationResults = calculator.getIterationsValuesSet();
 		try {
 			ObjectOutputStream out = new ObjectOutputStream(server.getOutputStream());

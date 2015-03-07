@@ -82,12 +82,12 @@ public class MarsClient implements AutoCloseable {
 	   }
 	}
 
-   public void receiveOptimizationOutputs() {
+   public Vector<IterationValuesSet> receiveOptimizationOutputs() {
 	   ObjectInputStream in;
-	   
+	   Vector<IterationValuesSet> optimizationResults = new Vector<IterationValuesSet>();
 	   try {
 		   in = new ObjectInputStream(clientSocket.getInputStream());
-		   Vector<IterationValuesSet> optimizationResults = (Vector<IterationValuesSet>) in.readObject();
+		   optimizationResults = (Vector<IterationValuesSet>) in.readObject();
 		   System.out.println(optimizationResults.toString());
 	   } catch (IOException e) {
 		// TODO Auto-generated catch block
@@ -96,6 +96,6 @@ public class MarsClient implements AutoCloseable {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
-	   
+	 return optimizationResults;  
    }
 }

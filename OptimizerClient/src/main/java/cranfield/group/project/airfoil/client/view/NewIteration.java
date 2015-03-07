@@ -7,12 +7,15 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Hashtable;
+import java.util.Vector;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
+import cranfield.group.project.airfoil.api.model.IterationValuesSet;
 import cranfield.group.project.airfoil.client.MarsClient;
+
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -31,10 +34,10 @@ public class NewIteration extends JPanel implements ActionListener {
     protected JPanel panelInitVar = new JPanel();
     protected JPanel panelButton = new JPanel();
     protected JPanel panelComboBox = new JPanel();
-    protected JPanel panelGraph = new JPanel();
 
+    protected GraphPanel panelGraph = new GraphPanel();
     protected JComboBox comboDragCoeff = new JComboBox();
-    protected String[] labelsInput = {"Aeroplane mass: ", "Minimal drag coefficient: ", "Maximum drag coeficient: ",
+    protected String[] labelsInput = {"Aeroplane mass: ", "Minimal drag coefficient: ", "Maximum lift coeficient: ",
         "Air speed: ", "Minimal air speed: "};
     protected SpinnerModel spinnerModelMass;
     protected SpinnerModel spinnerModelLift;
@@ -167,10 +170,10 @@ public class NewIteration extends JPanel implements ActionListener {
         panelButton.setLayout(new BoxLayout(panelButton, BoxLayout.Y_AXIS));
 
         startButton.addActionListener(new GetValueListener());
-        DrawGraph dg = new DrawGraph();
+        panelGraph = new GraphPanel();
         panelGraph.setLayout(new BoxLayout(panelGraph, BoxLayout.X_AXIS));
         panelGraph.setPreferredSize(new Dimension(200, 200));
-        panelGraph.add(dg);
+
         panelComponent.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.WEST;
@@ -244,13 +247,14 @@ public class NewIteration extends JPanel implements ActionListener {
             inputs.put(labelsInput[3], Double.parseDouble(spinnerModelSpeed.getValue().toString()));
             inputs.put(labelsInput[4], Double.parseDouble(spinnerModelMinSpeed.getValue().toString()));
             inputs.put(labelsInput[1], minDragCoeff);
-            inputs.put(labelsInitVar[0], Double.parseDouble(spinnerModelLift.getValue().toString()));
-            inputs.put(labelsInitVar[1], Double.parseDouble(spinnerModelLift.getValue().toString()));
-            inputs.put(labelsInitVar[2], Double.parseDouble(spinnerModelLift.getValue().toString()));
+            inputs.put(labelsInitVar[0], Double.parseDouble(spinnerModelSpan.getValue().toString()));
+            inputs.put(labelsInitVar[1], Double.parseDouble(spinnerModelChord.getValue().toString()));
+            inputs.put(labelsInitVar[2], Double.parseDouble(spinnerModelEdge.getValue().toString()));
             inputs.put("Iteration Number", Double.parseDouble(spinnerModelIterNumber.getValue().toString()));
 
             client.sendOptimizationInputs(inputs);
-            client.receiveOptimizationOutputs();
+            Vector<IterationValuesSet> optimizationResults = client.receiveOptimizationOutputs();
+            panelGraph.displayOptimizationRatio(optimizationResults);
         }
     }
 

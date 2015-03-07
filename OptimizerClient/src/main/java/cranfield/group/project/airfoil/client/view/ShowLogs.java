@@ -1,8 +1,6 @@
 package cranfield.group.project.airfoil.client.view;
 
-import java.awt.Color;
 import javax.swing.*;
-import javax.swing.border.Border;
 
 /**
  *
@@ -10,30 +8,30 @@ import javax.swing.border.Border;
  */
 public class ShowLogs extends JPanel{
     
-    ImageIcon icon = new ImageIcon("img/logo.png");
-    JLabel logo = new JLabel(icon);
-    JTextArea textArea;
-    JPanel panelTextField = new JPanel();
+    protected ImageIcon icon = new ImageIcon("src/img/logo.png");
+    protected JLabel logo = new JLabel(icon);
+    protected JTextArea textAreaLogs;
+    protected JLabel labelLogs = new JLabel("Logs: ");
+    protected JTextArea textAreaList;
+    protected JLabel labelList = new JLabel("List: ");
+    protected JPanel panelComponent = new JPanel();
 
     ShowLogs() {
 
-        /*textArea = new JTextArea(20,30);
-        //textArea.setColumns(5);
-        textArea.setLineWrap(true);
-        //textArea.setRows(5);
-        textArea.setWrapStyleWord(true);
-        textArea.setEditable(false);
-        JScrollPane scrollPane= new JScrollPane(textArea);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        panelTextField.add(scrollPane);
-        Border blackline;
-        blackline = BorderFactory.createLineBorder(Color.black);
-        panelTextField.setBorder(blackline);
-        //panelTestField.setLayout(new BoxLayout(panelTestField, BoxLayout.Y_AXIS));
-        add(panelTextField);*/
-        add(logo);
-        
-      
+       textAreaLogs = new JTextArea(12, 40);
+        textAreaLogs.setEditable(false);
+        JScrollPane scrollPaneLogs = new JScrollPane(textAreaLogs);
+        scrollPaneLogs.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        scrollPaneLogs.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        textAreaList = new JTextArea(12, 40);
+        textAreaList.setEditable(false);
+        JScrollPane scrollPaneList = new JScrollPane(textAreaList);
+        scrollPaneList.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        scrollPaneList.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        panelComponent.setLayout(new BoxLayout(panelComponent, BoxLayout.Y_AXIS));
+        panelComponent.add(labelLogs);
+        panelComponent.add(scrollPaneLogs);
+        panelComponent.add(labelList);
+        panelComponent.add(scrollPaneList);
     }
 }
