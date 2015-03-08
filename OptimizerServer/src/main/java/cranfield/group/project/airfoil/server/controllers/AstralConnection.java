@@ -12,7 +12,8 @@ public class AstralConnection implements AutoCloseable {
 
 	private final Session session;
 
-	private final static String HOST = "astral.central.cranfield.ac.uk";
+	// private final static String HOST = "astral.central.cranfield.ac.uk";
+	private final static String HOST = "hpcgate.cranfield.ac.uk";
 	private final static int PORT = 22;
 
 	public AstralConnection(String username, String password)

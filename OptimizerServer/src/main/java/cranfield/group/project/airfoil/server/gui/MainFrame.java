@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Observable;
+import java.util.Observer;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -20,11 +20,14 @@ import javax.swing.JTextArea;
 import javax.swing.JToggleButton;
 
 import cranfield.group.project.airfoil.server.MarsServer;
+import cranfield.group.project.airfoil.server.models.ConnectedUsers;
 
-public class MainFrame extends JFrame {
+public class MainFrame extends JFrame implements Observer {
 
 	private ServerSocketThread serverThread;
-	private Set<String> connectedUsers = new HashSet<>();
+	// private Set<String> connectedUsers = new HashSet<>();
+
+	private ConnectedUsers users;
 
 	public MainFrame() {
 		super("Server monitoring application");
@@ -47,6 +50,8 @@ public class MainFrame extends JFrame {
 				}
 			}
 		});
+		users = new ConnectedUsers();
+		users.addObserver(this);
 	}
 
 	private void initComponents() {
@@ -75,6 +80,14 @@ public class MainFrame extends JFrame {
 		mainPanel.add(Box.createVerticalStrut(10));
 
 		getContentPane().add(mainPanel);
+	}
+
+	@Override
+	public void update(Observable o, Object arg) {
+		usersArea.setText("");
+		for (String user : users) {
+			usersArea.append(user + "\n");
+		}
 	}
 
 	private class ToggleButtonLister implements ActionListener {
@@ -106,14 +119,18 @@ public class MainFrame extends JFrame {
 		public void run() {
 			try {
 				socket = new ServerSocket(PORT);
-				System.out.println("SERVER : Waiting for client on port "
-						+ socket.getLocalPort() + "...");
+				// System.out.println("SERVER : Waiting for client on port "
+				// + socket.getLocalPort() + "...");
+				outputArea.append("Waiting for client on port "
+						+ socket.getLocalPort() + "...\n");
 
 				while (true) {
 					Socket client = socket.accept();
-					System.out.println("SERVER : Just connected to "
-							+ client.getRemoteSocketAddress());
-					new Thread(new MarsServer(client, connectedUsers)).start();
+					// System.out.println("SERVER : Just connected to "
+					// + client.getRemoteSocketAddress());
+					outputArea.append("Just connected to "
+							+ client.getRemoteSocketAddress() + "\n");
+					new Thread(new MarsServer(client, users)).start();
 				}
 			} catch (SocketException e) {
 				// DO NOTHING
