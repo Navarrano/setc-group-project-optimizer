@@ -6,16 +6,16 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.Hashtable;
-import java.util.Set;
 import java.util.Vector;
 
 import com.jcraft.jsch.JSchException;
-import cranfield.group.project.airfoil.api.model.IterationValuesSet;
 
+import cranfield.group.project.airfoil.api.model.IterationValuesSet;
 import cranfield.group.project.airfoil.server.controllers.AirfoilCalculator;
 import cranfield.group.project.airfoil.server.controllers.AstralConnection;
 import cranfield.group.project.airfoil.server.entities.AstralUser;
 import cranfield.group.project.airfoil.server.entities.Logs;
+import cranfield.group.project.airfoil.server.models.ConnectedUsers;
 import cranfield.group.project.airfoil.server.services.LogsCRUDService;
 import cranfield.group.project.airfoil.server.services.UserCRUDService;
 
@@ -27,24 +27,25 @@ public class MarsServer extends Thread {
 
 	/** The server socket */
 	protected Socket client;
-	protected Set<String> connectedUsers;
+	// protected Set<String> connectedUsers;
 	protected String username;
+	protected ConnectedUsers users;
 
 	/** The database handler. */
 	// protected DatabaseHandler databaseHandler;
-         protected UserCRUDService astralUser;
-         protected LogsCRUDService logs;
+    protected UserCRUDService astralUser;
+	protected LogsCRUDService logs;
 
-	public MarsServer(Socket client, Set<String> users) {
+	public MarsServer(Socket client, ConnectedUsers users) {
 		this.client = client;
-		this.connectedUsers = users;
-                logs = new LogsCRUDService();
-                astralUser = new UserCRUDService();
+		this.users = users;
+        logs = new LogsCRUDService();
+        astralUser = new UserCRUDService();
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Thread#run()
 	 */
 	public void run() {
@@ -68,7 +69,7 @@ public class MarsServer extends Thread {
 					System.out.println(inputValues.get("Span: "));
 					break;
 				case "quit":
-					connectedUsers.remove(username);
+					users.remove(username);
 					isClientConnected = false;
 					client.close();
 					break;
@@ -93,15 +94,15 @@ public class MarsServer extends Thread {
 		double maxLiftCoef = inputValues.get("Maximum lift coeficient: ");
 		double airSpeed = inputValues.get("Air speed: ");
 		double minAirSpeed = inputValues.get("Minimal air speed: ");
-		
+
 		double span = inputValues.get("Span: ");
 		double chord = inputValues.get("Chord: ");
 		int nbIterations = inputValues.get("Iteration Number").intValue();
 		double leadingEdge = inputValues.get("Leading edge: ");
-		
+
 		AirfoilCalculator calculator = new AirfoilCalculator(minDragCoef,aeroPlaneMass,maxLiftCoef,airSpeed,minAirSpeed);
 		calculator.optimize(span, chord, leadingEdge, nbIterations);
-		
+
 		Vector<IterationValuesSet> optimizationResults = calculator.getIterationsValuesSet();
 		try {
 			ObjectOutputStream out = new ObjectOutputStream(server.getOutputStream());
@@ -139,7 +140,7 @@ public class MarsServer extends Thread {
 				// + credentials[1], "info", "connection");
                                 logs.addEventLog(new Logs("Connection granted : username "
                                                 + credentials[1], "info", "connection"));
-				
+
 				System.out.println("Good credentials");
 			} else {
 				out.writeObject(msg);
@@ -200,13 +201,13 @@ public class MarsServer extends Thread {
 	}
 
 	protected String areValidCredentialsWithError(String[] credentials) {
-		if (connectedUsers.contains(credentials[1]))
+		if (users.contains(credentials[1]))
 			return "User \"" + credentials[1]
 					+ "\" is already connected with server";
 		try (AstralConnection astralConnection = new AstralConnection(
 				credentials[1], credentials[2])) {
 			username = credentials[1];
-			connectedUsers.add(credentials[1]);
+			users.add(credentials[1]);
 		} catch (JSchException e) {
 			return e.getMessage();
 		}
