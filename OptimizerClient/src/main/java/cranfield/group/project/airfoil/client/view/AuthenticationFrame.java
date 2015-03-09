@@ -13,7 +13,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
-import java.net.Socket;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -28,6 +27,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import cranfield.group.project.airfoil.client.MarsClient;
+import cranfield.group.project.airfoil.client.util.ConnectionUtils;
 
 @SuppressWarnings("serial")
 public class AuthenticationFrame extends JFrame {
@@ -77,7 +77,7 @@ public class AuthenticationFrame extends JFrame {
 	}
 
 	private void initConnection() {
-		if (checkHostAvailability()) {
+		if (ConnectionUtils.checkHostAvailability(host, port)) {
 			loginButton.setEnabled(true);
 			errorLabel.setText(" ");
 			if (timer != null) {
@@ -91,15 +91,7 @@ public class AuthenticationFrame extends JFrame {
 		}
 	}
 
-	private boolean checkHostAvailability() {
-		try (Socket s = new Socket(host, port)) {
-			s.getOutputStream().write(0);
-			return true;
-		} catch (IOException ex) {
-			/* ignore */
-		}
-		return false;
-	}
+
 
 	private void startTimer() {
 		if (timer == null) {
@@ -212,7 +204,7 @@ public class AuthenticationFrame extends JFrame {
 			String ppaswd = new String(password);
 			password = null;
 
-			if (checkHostAvailability()) {
+			if (ConnectionUtils.checkHostAvailability(host, port)) {
 				try {
 					client = new MarsClient(host, port);
 					String msg = client.areValidatedCredentials(puname, ppaswd);
