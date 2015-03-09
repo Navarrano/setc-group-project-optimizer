@@ -26,6 +26,18 @@ public class IterationValuesSet implements Serializable {
 		return this.ratio;
 	}
 	
+	public double getDragForce(){
+		return this.dragForce;
+	}
+	
+	public double getLiftForce(){
+		return this.liftForce;
+	}
+	
+	public int getIteration(){
+		return this.iteration;
+	}
+	
 	@Override
 	public String toString(){
 		String res = "Nb Iterations: " + iteration + "\n";

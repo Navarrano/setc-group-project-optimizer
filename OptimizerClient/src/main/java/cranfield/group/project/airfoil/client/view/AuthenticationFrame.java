@@ -177,6 +177,9 @@ public class AuthenticationFrame extends JFrame {
 			String msg = client.areValidatedCredentials(puname, ppaswd);
 			if (msg == null) {
 				MainFrame mainFrame = new MainFrame(client);
+				client.addObserver(mainFrame.getShowLogs());
+				client.notifyObservers("Connected to Server @" + client.getClientSocket().getRemoteSocketAddress());
+
 				// regFace.setVisible(true);
 				dispose();
 			} else {

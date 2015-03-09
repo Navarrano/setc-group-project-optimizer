@@ -1,20 +1,28 @@
 package cranfield.group.project.airfoil.client;
  
 import cranfield.group.project.airfoil.api.model.IterationValuesSet;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Hashtable;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Vector;
 
-public class MarsClient implements AutoCloseable {
+public class MarsClient extends Observable implements AutoCloseable {
 	private Socket clientSocket;
 
 	public MarsClient(String serverName, Integer port) throws IOException {
 		clientSocket = new Socket(serverName, port);
 		System.out.println("CLIENT : Just connected to "
 				+ clientSocket.getRemoteSocketAddress());
+		setChanged();
+	}
+	
+	public Socket getClientSocket(){
+		return clientSocket;
 	}
 
 	public boolean isConnected() {
@@ -22,7 +30,6 @@ public class MarsClient implements AutoCloseable {
 	}
 
 	public String areValidatedCredentials(String username, String password) {
-		// boolean areValidatedCredentials = false;
 		String msg = null;
 		String credentials[] = { "credentials", username, password };
 		try {
@@ -37,9 +44,7 @@ public class MarsClient implements AutoCloseable {
 		ObjectInputStream in;
 		try {
 			in = new ObjectInputStream(clientSocket.getInputStream());
-			// areValidatedCredentials = (boolean) in.readObject();
 			msg = (String) in.readObject();
-			System.out.println("here!");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -72,7 +77,10 @@ public class MarsClient implements AutoCloseable {
    public void sendOptimizationInputs(Hashtable<String, Double> inputs) {
 	   String messageForServerAction[]={"optimization"};
 	   try {
-		   System.out.println("Send Optimization inputs to Server");
+		   setChanged();
+		   notifyObservers("Sending Optimization inputs to the server: ");
+		   setChanged();
+		   notifyObservers(inputs);
 		   ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
 		   out.writeObject(messageForServerAction);
 		   out.writeObject(inputs);
@@ -88,7 +96,12 @@ public class MarsClient implements AutoCloseable {
 	   try {
 		   in = new ObjectInputStream(clientSocket.getInputStream());
 		   optimizationResults = (Vector<IterationValuesSet>) in.readObject();
-		   System.out.println(optimizationResults.toString());
+		   setChanged();
+		   notifyObservers("Receiving Optimization results from the server: ");
+		   setChanged();
+		   notifyObservers(optimizationResults);
+		   setChanged();
+		   notifyObservers("End of Optimization results reception");
 	   } catch (IOException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
