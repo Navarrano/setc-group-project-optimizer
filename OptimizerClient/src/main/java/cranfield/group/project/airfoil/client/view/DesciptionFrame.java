@@ -5,7 +5,7 @@ import javax.swing.*;
 
 public class DesciptionFrame extends JPanel {
 
-    protected ImageIcon icon = new ImageIcon("src/img/logo.png");
+    protected ImageIcon icon = new ImageIcon("img/logo.png");
     protected JLabel logo = new JLabel(icon);
     public static final String description = "<html><p style=\"text-align: center;\">MARS application</p>\n"
             + "\n"
