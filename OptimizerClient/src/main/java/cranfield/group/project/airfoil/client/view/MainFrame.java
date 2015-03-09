@@ -23,6 +23,7 @@ public class MainFrame {
 
     protected JFrame frame = new JFrame("Randomly Selected");
     protected final JPanel contentPane = new JPanel();
+    protected ShowLogs showlogs;
     protected MarsClient client;
 
 	protected String host;
@@ -34,7 +35,7 @@ public class MainFrame {
 
         NewIteration newIter = new NewIteration(client);
         contentPane.add(newIter.panelComponent);
-        ShowLogs showlogs = new ShowLogs();
+        showlogs = new ShowLogs();
         contentPane.add(showlogs.panelComponent,"2");
         DesciptionFrame newDesc = new DesciptionFrame();
         contentPane.add(newDesc.panelComponent);
@@ -47,6 +48,10 @@ public class MainFrame {
         frame.setLocationRelativeTo(null);
 
         actionClosingWindow();
+    }
+    
+    public ShowLogs getShowLogs(){
+    	return showlogs;
     }
 
     private void createMenuBar() {
