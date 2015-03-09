@@ -57,6 +57,7 @@ public class AirfoilCalculator {
 					- STEP_SIZE
 					* calcNumericalDerivativeByAngle(oldB, oldC, angle,
 							deltaAngle);
+			//TODO: Save current iteration results in the DB
 		}
 	}
 

@@ -1,6 +1,5 @@
 package cranfield.group.project.airfoil.client.view;
 
-import java.awt.GridLayout;
 import javax.swing.*;
 
 public class DesciptionFrame extends JPanel {

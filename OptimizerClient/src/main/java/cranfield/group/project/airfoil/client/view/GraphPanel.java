@@ -24,7 +24,12 @@ public class GraphPanel extends JPanel
    public GraphPanel()
    {
       super();
-      JFreeChart ratioGraph = ChartFactory.createXYLineChart(
+      resetGraph();
+   }
+   
+   public void resetGraph(){
+	   removeAll();
+	   JFreeChart ratioGraph = ChartFactory.createXYLineChart(
     		  "", 
     		  "Iterations", 
     		  "Lift/Drag", 
@@ -33,9 +38,10 @@ public class GraphPanel extends JPanel
     		  false, 
     		  false, 
     		  false);
-      ChartPanel chartPanel = new ChartPanel(ratioGraph);
-      chartPanel.setPreferredSize( new java.awt.Dimension( 560 , 367 ) );
-      add(chartPanel);
+
+      add(new ChartPanel(ratioGraph));	
+	  // Update the display to make the new graph appear
+	  revalidate();
    }
    
    public void displayOptimizationRatio(Vector<IterationValuesSet> optimizationResults){

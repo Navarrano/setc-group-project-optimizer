@@ -14,11 +14,13 @@ import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
 import cranfield.group.project.airfoil.api.model.IterationValuesSet;
+import cranfield.group.project.airfoil.api.model.OptimizationObject;
 import cranfield.group.project.airfoil.client.MarsClient;
 
 import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 /**
  *
@@ -49,6 +51,11 @@ public class NewIteration extends JPanel implements ActionListener {
     protected JSpinner spinnerIterNumber;
     protected String[] labelsInitVar = {"Span: ", "Chord: ", "Leading edge: "};
     protected JLabel picture;
+    protected int counter = 0;
+    protected JList optimizationsList;
+    protected DefaultListModel<OptimizationObject> optimizationsListModel;
+    protected String[] dummyValues = {"0", "0", "0", "0", "0", "0", "0", "0", "0"};
+    
 
     protected MarsClient client;
 
@@ -125,6 +132,11 @@ public class NewIteration extends JPanel implements ActionListener {
         JButton startButton = new JButton("start optimization");
         JButton iterateButton = new JButton("iterate");
         JButton createButton = new JButton("create new optimization");
+        
+        optimizationsListModel = new DefaultListModel();
+        initializeOptimizationListModel();
+        optimizationsList = new JList(optimizationsListModel);
+        JScrollPane paneList = new JScrollPane(optimizationsList);
 
         panelInput.add(panelComboBox);
         Border loweredbevel;
@@ -167,6 +179,8 @@ public class NewIteration extends JPanel implements ActionListener {
 
         Border loweredbevelList;
         loweredbevelList = BorderFactory.createLoweredBevelBorder();
+        panelList.setLayout(new BoxLayout(panelList, BoxLayout.X_AXIS));
+        panelList.add(paneList);
         panelList.setBorder(loweredbevelList);
         panelList.setPreferredSize(new Dimension(200, 100));
         TitledBorder titleList;
@@ -200,9 +214,18 @@ public class NewIteration extends JPanel implements ActionListener {
         startButton.addActionListener(new GetValueListener());
         createButton.addActionListener(new CreateNewOptimListener());
         iterateButton.addActionListener(new AddNewIterListener());
+        optimizationsList.addListSelectionListener(new SharedListSelectionHandler());
+   
     }
 
-    protected static JSpinner addLabeledSpinner(Container c, String label, SpinnerModel model) {
+    protected void initializeOptimizationListModel() {
+    	// TODO: Send query to Server to fetch all the optimizations (only id and name workflow table's fields) from the DB
+    	OptimizationObject test = new OptimizationObject(1,"test Optimization");
+    	optimizationsListModel.addElement(test);
+    	
+	}
+
+	protected static JSpinner addLabeledSpinner(Container c, String label, SpinnerModel model) {
         JLabel l = new JLabel(label);
         c.add(l);
 
@@ -217,7 +240,8 @@ public class NewIteration extends JPanel implements ActionListener {
 
         return spinner;
     }
- public void enableComponents(Container container, boolean enable) {
+    
+    public void enableComponents(Container container, boolean enable) {
         Component[] components = container.getComponents();
         for (Component component : components) {
             if (component != spinnerIterNumber) {
@@ -229,6 +253,19 @@ public class NewIteration extends JPanel implements ActionListener {
 
         }
     }
+ 
+    public void setInputValues() {   
+         spinnerModelMass.setValue(Double.parseDouble(dummyValues[0].toString()));
+         spinnerModelLift.setValue(Double.parseDouble(dummyValues[1].toString()));
+         spinnerModelSpeed.setValue(Double.parseDouble(dummyValues[2].toString()));
+         spinnerModelMinSpeed.setValue(Double.parseDouble(dummyValues[3].toString()));
+         spinnerModelSpan.setValue(Double.parseDouble(dummyValues[4].toString()));
+         spinnerModelChord.setValue(Double.parseDouble(dummyValues[5].toString()));
+         spinnerModelEdge.setValue(Double.parseDouble(dummyValues[6].toString()));
+         spinnerModelIterNumber.setValue(Double.parseDouble(dummyValues[7].toString()));
+         spinnerIterNumber.setValue(Double.parseDouble(dummyValues[8].toString()));
+     }
+    
     public void actionPerformed(ActionEvent e) {
         JComboBox cb = (JComboBox) e.getSource();
         String planeName = (((String[]) comboDragCoeff.getSelectedItem())[1]).toString();
@@ -268,17 +305,19 @@ public class NewIteration extends JPanel implements ActionListener {
             client.sendOptimizationInputs(inputs);
             enableComponents(panelInitVar, false);
             enableComponents(panelInput, false);
-           // enableComponents(panelButton, false);
+            //enableComponents(panelButton, false);
+            optimizationsListModel.addElement(new OptimizationObject(counter,"Data from " + counter));
+            counter++;
             
             Vector<IterationValuesSet> optimizationResults = client.receiveOptimizationOutputs();
             panelGraph.displayOptimizationRatio(optimizationResults);
         }
     }
+    
     class CreateNewOptimListener implements ActionListener {
 
         public void actionPerformed(ActionEvent event) {
-        	enableComponents(panelInitVar, true);
-            enableComponents(panelInput, true);
+
         }
     }
 
@@ -286,7 +325,19 @@ public class NewIteration extends JPanel implements ActionListener {
 
         public void actionPerformed(ActionEvent event) {
 
-
+        }
+    }
+    
+    class SharedListSelectionHandler implements ListSelectionListener {
+        public void valueChanged(ListSelectionEvent e) { ;
+        	int selectedOptimization = optimizationsList.getSelectedIndex();
+        	System.out.println("Optimization Id: "+optimizationsListModel.get(selectedOptimization).getId());
+        	// Send query to server (using MarsClient) to fetch corresponding inputs & results for DB
+            System.out.println("Event for indexes "
+                          + optimizationsList.getSelectedIndex() );
+            // TODO: Set input values using the fetched data + generating corresponding graph
+            setInputValues();
+            
         }
     }
 

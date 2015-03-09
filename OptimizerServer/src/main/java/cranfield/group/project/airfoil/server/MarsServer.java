@@ -64,6 +64,7 @@ public class MarsServer extends Thread {
 					break;
 				case "optimization":
 					Hashtable<String, Double> inputValues = (Hashtable<String, Double>) in.readObject();
+					//TODO: Create new workflow record in the DB and get the corresponding id to then pass it to runOptimization
 					runOptimization(client,inputValues);
 					System.out.println(inputValues.toString());
 					System.out.println(inputValues.get("Span: "));
