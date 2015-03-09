@@ -6,14 +6,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import cranfield.group.project.airfoil.client.MarsClient;
+import cranfield.group.project.airfoil.client.util.ConnectionUtils;
 
 /**
  *
@@ -26,11 +30,16 @@ public class MainFrame {
     protected ShowLogs showlogs;
     protected MarsClient client;
 
-	protected String host;
-	protected int port;
+	protected final String host;
+	protected final int port;
 
-	public MainFrame(MarsClient client) {
+	protected final Timer checkServerResponseTimer;
+	protected static final int TIMER_PERIOD = 10 * 1000;
+
+	public MainFrame(final MarsClient client, final String host, final int port) {
     	this.client = client;
+    	this.host = host;
+    	this.port = port;
         contentPane.setLayout(new CardLayout());
 
         NewIteration newIter = new NewIteration(client);
@@ -48,8 +57,32 @@ public class MainFrame {
         frame.setLocationRelativeTo(null);
 
         actionClosingWindow();
+		checkServerResponseTimer = new Timer("CheckServerResponse");
+		checkServerResponseTimer.schedule(new TimerTask() {
+
+			@Override
+			public void run() {
+				if (!ConnectionUtils.checkHostAvailability(host, port)) {
+					client.terminateConnection();
+					checkServerResponseTimer.cancel();
+					int res = JOptionPane
+							.showConfirmDialog(
+									frame,
+									"Connection with serves has been lost.\nClick OK if you want to return to login frame.",
+									"Connection lost",
+									JOptionPane.OK_CANCEL_OPTION,
+									JOptionPane.ERROR_MESSAGE);
+					if (res == JOptionPane.OK_OPTION) {
+						AuthenticationFrame frame = new AuthenticationFrame(
+								host, port);
+						frame.setVisible(true);
+					}
+					frame.dispose();
+				}
+			}
+		}, 0L, TIMER_PERIOD);
     }
-    
+
     public ShowLogs getShowLogs(){
     	return showlogs;
     }
@@ -93,6 +126,7 @@ public class MainFrame {
     		public void windowClosing(WindowEvent e) {
     			// Terminate the socket connection with the server
     			client.terminateConnection();
+				checkServerResponseTimer.cancel();
     		}
     	});
     }

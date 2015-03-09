@@ -209,7 +209,7 @@ public class AuthenticationFrame extends JFrame {
 					client = new MarsClient(host, port);
 					String msg = client.areValidatedCredentials(puname, ppaswd);
 					if (msg == null) {
-						MainFrame mainFrame = new MainFrame(client);
+						MainFrame mainFrame = new MainFrame(client, host, port);
 						client.addObserver(mainFrame.getShowLogs());
 						client.notifyObservers("Connected to Server @" + client.getClientSocket().getRemoteSocketAddress());
 						// regFace.setVisible(true);
