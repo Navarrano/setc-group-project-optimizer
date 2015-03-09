@@ -26,14 +26,13 @@ import java.awt.GridBagLayout;
  */
 public class NewIteration extends JPanel implements ActionListener {
 
-    protected ImageIcon icon = new ImageIcon("img/logo.png");
-    protected JLabel logo = new JLabel(icon);
     protected JPanel panelComponent = new JPanel();
     protected JPanel panelInput = new JPanel();
     protected JPanel panelPicture = new JPanel();
     protected JPanel panelInitVar = new JPanel();
     protected JPanel panelButton = new JPanel();
     protected JPanel panelComboBox = new JPanel();
+    protected JPanel panelList = new JPanel();
 
     protected GraphPanel panelGraph = new GraphPanel();
     protected JComboBox comboDragCoeff = new JComboBox();
@@ -47,6 +46,7 @@ public class NewIteration extends JPanel implements ActionListener {
     protected SpinnerModel spinnerModelChord;
     protected SpinnerModel spinnerModelEdge;
     protected SpinnerModel spinnerModelIterNumber;
+    protected JSpinner spinnerIterNumber;
     protected String[] labelsInitVar = {"Span: ", "Chord: ", "Leading edge: "};
     protected JLabel picture;
 
@@ -89,7 +89,6 @@ public class NewIteration extends JPanel implements ActionListener {
         comboDragCoeff.addItem(new String[]{"0.027", "Cessna 172-182"});
         comboDragCoeff.addItem(new String[]{"0.027", "Cessna 310"});
         comboDragCoeff.addItem(new String[]{"0.031", "Boeing 747"});
-        comboDragCoeff.addItem(new String[]{"0.044", "F-4 Phantom II "});
         comboDragCoeff.addItem(new String[]{"0.048", "F-104 Starfighter"});
         comboDragCoeff.addActionListener(this);
 
@@ -97,11 +96,8 @@ public class NewIteration extends JPanel implements ActionListener {
         picture.setFont(picture.getFont().deriveFont(Font.ITALIC));
         picture.setHorizontalAlignment(JLabel.CENTER);
         updateComboLabel();
-        picture.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+      //  picture.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
         picture.setPreferredSize(new Dimension(300, 100));
-         // picture.setSize((panelPicture.getWidth()/2), panelPicture.getHeight());
-
-        // panelComboBox.setLayout(new BoxLayout(panelComboBox, BoxLayout.Y_AXIS));
         panelComboBox.add(labelComboBox);
         panelComboBox.add(comboDragCoeff);
 
@@ -124,25 +120,25 @@ public class NewIteration extends JPanel implements ActionListener {
                 0, //min
                 500, //max
                 1);//step
-        JSpinner spinnerIterNumber = addLabeledSpinner(panelInitVar, "Iteration Number", spinnerModelIterNumber);
+        spinnerIterNumber = addLabeledSpinner(panelInitVar, "Iteration Number", spinnerModelIterNumber);
 
-        JButton startButton = new JButton("start");
-        JButton stopButton = new JButton("stop");
-        JButton resumeButton = new JButton("resume");
+        JButton startButton = new JButton("start optimization");
+        JButton iterateButton = new JButton("iterate");
+        JButton createButton = new JButton("create new optimization");
 
         panelInput.add(panelComboBox);
         Border loweredbevel;
         loweredbevel = BorderFactory.createLoweredBevelBorder();
-        panelInput.setBorder(loweredbevel);
         TitledBorder titleInput;
         titleInput = BorderFactory.createTitledBorder(
                 loweredbevel, "Input parameters");
         titleInput.setTitlePosition(TitledBorder.CENTER);
-        panelInput.setBorder(titleInput);
         panelInput.setLayout(new BoxLayout(panelInput, BoxLayout.Y_AXIS));
         panelPicture.setLayout(new BoxLayout(panelPicture, BoxLayout.X_AXIS));
         panelPicture.add(picture);
         panelPicture.add(panelInput);
+        panelPicture.setBorder(loweredbevel);
+        panelPicture.setBorder(titleInput);
 
         Border loweredbevelInitvar;
         loweredbevelInitvar = BorderFactory.createLoweredBevelBorder();
@@ -156,9 +152,9 @@ public class NewIteration extends JPanel implements ActionListener {
 
         panelButton.add(startButton);
         panelButton.add(Box.createRigidArea(new Dimension(10, 10)));
-        panelButton.add(stopButton);
+        panelButton.add(iterateButton);
         panelButton.add(Box.createRigidArea(new Dimension(10, 10)));
-        panelButton.add(resumeButton);
+        panelButton.add(createButton);
         Border loweredbevelButton;
         loweredbevelButton = BorderFactory.createLoweredBevelBorder();
         panelButton.setBorder(loweredbevel);
@@ -167,37 +163,43 @@ public class NewIteration extends JPanel implements ActionListener {
                 loweredbevelButton, "Button area");
         titleButton.setTitlePosition(TitledBorder.CENTER);
         panelButton.setBorder(titleButton);
-        panelButton.setLayout(new BoxLayout(panelButton, BoxLayout.Y_AXIS));
+        panelButton.setLayout(new BoxLayout(panelButton, BoxLayout.X_AXIS));
+
+        Border loweredbevelList;
+        loweredbevelList = BorderFactory.createLoweredBevelBorder();
+        panelList.setBorder(loweredbevelList);
+        panelList.setPreferredSize(new Dimension(200, 100));
+        TitledBorder titleList;
+        titleList = BorderFactory.createTitledBorder(
+                loweredbevelList, "Last values");
+        titleList.setTitlePosition(TitledBorder.CENTER);
+        panelList.setBorder(titleList);
+
+       
+        panelGraph.setLayout(new BoxLayout(panelGraph, BoxLayout.X_AXIS));
+        panelGraph.setPreferredSize(new Dimension(100, 400));
+
+        JPanel panelBoxLayout1 = new JPanel();
+        panelBoxLayout1.setLayout(new BoxLayout(panelBoxLayout1, BoxLayout.LINE_AXIS));
+        panelBoxLayout1.add(panelPicture);
+        panelBoxLayout1.add(panelInitVar);
+        JPanel panelBoxLayout2 = new JPanel();
+        panelBoxLayout2.setLayout(new BoxLayout(panelBoxLayout2, BoxLayout.PAGE_AXIS));
+        panelBoxLayout2.add(panelGraph);
+        panelBoxLayout2.add(panelButton);
+        JPanel panelBoxLayout3 = new JPanel();
+        panelBoxLayout3.setLayout(new BoxLayout(panelBoxLayout3, BoxLayout.PAGE_AXIS));
+        panelBoxLayout3.add(panelBoxLayout1);
+        panelBoxLayout3.add(panelBoxLayout2);
+        JPanel panelBoxLayout4 = new JPanel();
+        panelBoxLayout4.setLayout(new BoxLayout(panelBoxLayout4, BoxLayout.LINE_AXIS));
+        panelBoxLayout4.add(panelList);
+        panelBoxLayout4.add(panelBoxLayout3);
+        panelComponent.add(panelBoxLayout4);
 
         startButton.addActionListener(new GetValueListener());
-        panelGraph = new GraphPanel();
-        panelGraph.setLayout(new BoxLayout(panelGraph, BoxLayout.X_AXIS));
-        panelGraph.setPreferredSize(new Dimension(200, 200));
-
-        panelComponent.setLayout(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.WEST;
-        c.fill = GridBagConstraints.VERTICAL;
-        c.gridx = 0;
-        c.gridy = 0;
-        panelComponent.add(logo, c);
-        c.fill = GridBagConstraints.VERTICAL;
-        c.gridx = 0;
-        c.gridy = 1;
-        panelComponent.add(panelPicture, c);
-        c.fill = GridBagConstraints.VERTICAL;
-        c.gridx = 0;
-        c.gridy = 2;
-        panelComponent.add(panelInitVar, c);
-        c.fill = GridBagConstraints.VERTICAL;
-        c.gridx = 0;
-        c.gridy = 3;
-        panelComponent.add(panelButton, c);
-        c.fill = GridBagConstraints.VERTICAL;
-        c.gridx = 0;
-        c.gridy = 2;
-        c.anchor = GridBagConstraints.PAGE_END;
-        panelComponent.add(panelGraph, c);
+        createButton.addActionListener(new CreateNewOptimListener());
+        iterateButton.addActionListener(new AddNewIterListener());
     }
 
     protected static JSpinner addLabeledSpinner(Container c, String label, SpinnerModel model) {
@@ -215,25 +217,36 @@ public class NewIteration extends JPanel implements ActionListener {
 
         return spinner;
     }
-    
+ public void enableComponents(Container container, boolean enable) {
+        Component[] components = container.getComponents();
+        for (Component component : components) {
+            if (component != spinnerIterNumber) {
+                component.setEnabled(enable);
+                if (component instanceof Container) {
+                    enableComponents((Container) component, enable);
+                }
+            }
+
+        }
+    }
     public void actionPerformed(ActionEvent e) {
-     JComboBox cb = (JComboBox) e.getSource();
-     String planeName = (((String[]) comboDragCoeff.getSelectedItem())[1]).toString();
-     updateComboLabel();
-     }
-    
+        JComboBox cb = (JComboBox) e.getSource();
+        String planeName = (((String[]) comboDragCoeff.getSelectedItem())[1]).toString();
+        updateComboLabel();
+    }
+
     protected void updateComboLabel() {
 
-     String planeName = (((String[]) comboDragCoeff.getSelectedItem())[1]).toString();
-     ImageIcon icon = new ImageIcon("img/" + planeName + ".png");
-     picture.setIcon(icon);
-     picture.setToolTipText("A photo of a " + planeName.toLowerCase());
-     if (icon != null) {
-     picture.setText(null);
-     } else {
-     picture.setText("Image not found");
-     }
-     }
+        String planeName = (((String[]) comboDragCoeff.getSelectedItem())[1]).toString();
+        ImageIcon icon = new ImageIcon("img/" + planeName + ".png");
+        picture.setIcon(icon);
+        picture.setToolTipText("A photo of a " + planeName.toLowerCase());
+        if (icon != null) {
+            picture.setText(null);
+        } else {
+            picture.setText("Image not found");
+        }
+    }
 
     class GetValueListener implements ActionListener {
 
@@ -253,8 +266,27 @@ public class NewIteration extends JPanel implements ActionListener {
             inputs.put("Iteration Number", Double.parseDouble(spinnerModelIterNumber.getValue().toString()));
 
             client.sendOptimizationInputs(inputs);
+            enableComponents(panelInitVar, false);
+            enableComponents(panelInput, false);
+           // enableComponents(panelButton, false);
+            
             Vector<IterationValuesSet> optimizationResults = client.receiveOptimizationOutputs();
             panelGraph.displayOptimizationRatio(optimizationResults);
+        }
+    }
+    class CreateNewOptimListener implements ActionListener {
+
+        public void actionPerformed(ActionEvent event) {
+        	enableComponents(panelInitVar, true);
+            enableComponents(panelInput, true);
+        }
+    }
+
+    class AddNewIterListener implements ActionListener {
+
+        public void actionPerformed(ActionEvent event) {
+
+
         }
     }
 

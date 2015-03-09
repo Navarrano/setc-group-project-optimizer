@@ -42,8 +42,8 @@ public class MainFrame {
         DesciptionFrame newDesc = new DesciptionFrame();
         contentPane.add(newDesc.panelComponent);
         createMenuBar();
-         frame.add(contentPane);
-        frame.setPreferredSize(new Dimension(720, 700));
+        frame.add(contentPane);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
         frame.pack();
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
