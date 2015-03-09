@@ -21,6 +21,7 @@ import javax.swing.JToggleButton;
 
 import cranfield.group.project.airfoil.server.MarsServer;
 import cranfield.group.project.airfoil.server.models.ConnectedUsers;
+import cranfield.group.project.airfoil.server.services.EntityFactoryProvider;
 
 public class MainFrame extends JFrame implements Observer {
 
@@ -35,6 +36,8 @@ public class MainFrame extends JFrame implements Observer {
 		initComponents();
 		pack();
 		setLocationRelativeTo(null);
+		EntityFactoryProvider.getInstance().createEntityManagerFactory()
+				.createEntityManager();
 
 		serverThread = new ServerSocketThread();
 		serverThread.start();
@@ -46,7 +49,8 @@ public class MainFrame extends JFrame implements Observer {
 				// Terminate the socket connection with the server
 				if (serverThread != null) {
 					serverThread.interrupt();
-					System.out.println("Thread stopped");
+					EntityFactoryProvider.getInstance()
+							.createEntityManagerFactory().close();
 				}
 			}
 		});
