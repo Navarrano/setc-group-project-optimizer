@@ -88,6 +88,9 @@ public class MainFrame extends JFrame implements Observer {
 		for (String user : users) {
 			usersArea.append(user + "\n");
 		}
+		if (arg != null) {
+			outputArea.append(arg + " has disconnected\n");
+		}
 	}
 
 	private class ToggleButtonLister implements ActionListener {
@@ -126,6 +129,8 @@ public class MainFrame extends JFrame implements Observer {
 
 				while (true) {
 					Socket client = socket.accept();
+					if (client.getInputStream().read() == 0)
+						continue;
 					// System.out.println("SERVER : Just connected to "
 					// + client.getRemoteSocketAddress());
 					outputArea.append("Just connected to "
@@ -154,7 +159,7 @@ public class MainFrame extends JFrame implements Observer {
 			try {
 				if (socket != null && !socket.isClosed()) {
 					socket.close();
-					System.out.println("SERVER: Socket has been closed");
+					outputArea.append("Server has been closed\n");
 				}
 			} catch (IOException e) {
 				e.printStackTrace();

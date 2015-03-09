@@ -19,7 +19,7 @@ public class ConnectedUsers extends Observable implements Iterable<String> {
 	public void remove(String user) {
 		connectedUsers.remove(user);
 		setChanged();
-		notifyObservers();
+		notifyObservers(user);
 	}
 
 	public boolean contains(String user) {

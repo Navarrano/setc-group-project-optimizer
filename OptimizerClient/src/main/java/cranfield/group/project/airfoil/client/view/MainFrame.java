@@ -2,10 +2,13 @@ package cranfield.group.project.airfoil.client.view;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
+import java.net.Socket;
 
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -14,23 +17,24 @@ import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 
 import cranfield.group.project.airfoil.client.MarsClient;
-import java.awt.Dimension;
 
 /**
  *
  * @author Kat
  */
 public class MainFrame {
-	
+
     protected JFrame frame = new JFrame("Randomly Selected");
     protected final JPanel contentPane = new JPanel();
     protected MarsClient client;
 
-    public MainFrame(MarsClient client) {
+	protected String host;
+	protected int port;
 
+	public MainFrame(MarsClient client) {
     	this.client = client;
         contentPane.setLayout(new CardLayout());
-        
+
         NewIteration newIter = new NewIteration(client);
         contentPane.add(newIter.panelComponent);
         ShowLogs showlogs = new ShowLogs();
@@ -44,7 +48,7 @@ public class MainFrame {
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
-        
+
         actionClosingWindow();
     }
 
@@ -81,6 +85,16 @@ public class MainFrame {
         frame.setJMenuBar(menubar);
     }
 
+	private boolean checkHostAvailability() {
+		try (Socket s = new Socket(host, port)) {
+			s.getOutputStream().write(0);
+			return true;
+		} catch (IOException ex) {
+			/* ignore */
+		}
+		return false;
+	}
+
     private void actionClosingWindow(){
     	// Add Listener on the close-window button
     	frame.addWindowListener(new WindowAdapter() {
@@ -90,7 +104,7 @@ public class MainFrame {
     		}
     	});
     }
-    
+
     class IterActionListener implements ActionListener {
 
         public void actionPerformed(ActionEvent e) {

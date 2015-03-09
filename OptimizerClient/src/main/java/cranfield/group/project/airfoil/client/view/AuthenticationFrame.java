@@ -13,6 +13,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
+import java.net.Socket;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -29,6 +32,8 @@ import cranfield.group.project.airfoil.client.MarsClient;
 @SuppressWarnings("serial")
 public class AuthenticationFrame extends JFrame {
 
+	private final static int TIMER_PERIOD = 5 * 1000;
+
 	private MarsClient client;
 
 	private final JPanel panel = new JPanel();
@@ -41,6 +46,8 @@ public class AuthenticationFrame extends JFrame {
 	private String host;
 	private int port;
 
+	private Timer timer;
+
 	public AuthenticationFrame(String host, int port) {
 		super("Login Authentication");
 		this.host = host;
@@ -52,7 +59,7 @@ public class AuthenticationFrame extends JFrame {
 		// setLocation(500, 280);
 
 		initComponents();
-		initConnection(host, port);
+		initConnection();
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -62,19 +69,50 @@ public class AuthenticationFrame extends JFrame {
 				// Terminate the socket connection with the server
 				if (client != null && client.isConnected())
 					client.terminateConnection();
+				if (timer != null)
+					timer.cancel();
 			}
 		});
 		pack();
 	}
 
-	private void initConnection(String host, int port) {
-		try {
-			client = new MarsClient(host, port);
+	private void initConnection() {
+		if (checkHostAvailability()) {
 			loginButton.setEnabled(true);
 			errorLabel.setText(" ");
-		} catch (IOException e) {
+			if (timer != null) {
+				timer.cancel();
+				timer = null;
+			}
+		} else {
 			loginButton.setEnabled(false);
 			errorLabel.setText(errorMsg);
+			startTimer();
+		}
+	}
+
+	private boolean checkHostAvailability() {
+		try (Socket s = new Socket(host, port)) {
+			s.getOutputStream().write(0);
+			return true;
+		} catch (IOException ex) {
+			/* ignore */
+		}
+		return false;
+	}
+
+	private void startTimer() {
+		if (timer == null) {
+			timer = new Timer("CheckServerConnectionTimer");
+			timer.schedule(new TimerTask() {
+
+				@Override
+				public void run() {
+					System.out.println("Searching for server at " + host + ":"
+							+ port);
+					initConnection();
+				}
+			}, TIMER_PERIOD, TIMER_PERIOD);
 		}
 	}
 
@@ -158,7 +196,7 @@ public class AuthenticationFrame extends JFrame {
 				host = hostField.getText();
 				try {
 					port = Integer.parseInt(portField.getText());
-					initConnection(host, port);
+					initConnection();
 				} catch (NumberFormatException ex) {
 					errorLabel.setText("Port must be a number");
 				}
@@ -174,17 +212,32 @@ public class AuthenticationFrame extends JFrame {
 			String ppaswd = new String(password);
 			password = null;
 
-			String msg = client.areValidatedCredentials(puname, ppaswd);
-			if (msg == null) {
-				MainFrame mainFrame = new MainFrame(client);
-				// regFace.setVisible(true);
-				dispose();
+			if (checkHostAvailability()) {
+				try {
+					client = new MarsClient(host, port);
+					String msg = client.areValidatedCredentials(puname, ppaswd);
+					if (msg == null) {
+						MainFrame mainFrame = new MainFrame(client);
+						// regFace.setVisible(true);
+						dispose();
+					} else {
+						JOptionPane.showMessageDialog(null, msg);
+						txuser.setText("");
+						pass.setText("");
+						txuser.requestFocus();
+					}
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
 			} else {
-				JOptionPane.showMessageDialog(null, msg);
-				txuser.setText("");
-				pass.setText("");
-				txuser.requestFocus();
+				JOptionPane.showMessageDialog(null,
+						"Can't connect with server", "No server connection",
+						JOptionPane.ERROR_MESSAGE);
+				startTimer();
+				loginButton.setEnabled(false);
+				errorLabel.setText(errorMsg);
 			}
+
 		}
 	}
 

@@ -1,6 +1,5 @@
 package cranfield.group.project.airfoil.client;
- 
-import cranfield.group.project.airfoil.api.model.IterationValuesSet;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -8,11 +7,14 @@ import java.net.Socket;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import cranfield.group.project.airfoil.api.model.IterationValuesSet;
+
 public class MarsClient implements AutoCloseable {
 	private Socket clientSocket;
 
 	public MarsClient(String serverName, Integer port) throws IOException {
 		clientSocket = new Socket(serverName, port);
+		clientSocket.getOutputStream().write(1);
 		System.out.println("CLIENT : Just connected to "
 				+ clientSocket.getRemoteSocketAddress());
 	}
@@ -96,6 +98,6 @@ public class MarsClient implements AutoCloseable {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
-	 return optimizationResults;  
+		return optimizationResults;
    }
 }
