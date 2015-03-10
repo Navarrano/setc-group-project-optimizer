@@ -79,8 +79,7 @@ public class MarsServer extends Thread {
 					break;
 				case "optimization":
 					Hashtable<String, Double> inputValues = (Hashtable<String, Double>) in.readObject();
-					//TODO: Create new workflow record in the DB and get the corresponding id to then pass it to runOptimization
-					runOptimization(client,inputValues);
+					runOptimization(client,dataFromClient[1],inputValues);
 					System.out.println(inputValues.toString());
 					System.out.println(inputValues.get("Span: "));
 					break;
@@ -138,9 +137,9 @@ public class MarsServer extends Thread {
 		return tmp;
 	}
 
-	private void runOptimization(Socket server, Hashtable<String, Double> inputValues) {
+	private void runOptimization(Socket server, String workflowName, Hashtable<String, Double> inputValues) {
+		String name = workflowName;
 		//double minDragCoef = inputValues.get("Minimal drag coefficient: ");
-		String name = "Optimization Name";
 		double minDragCoef = 0.021;
 		double aeroPlaneMass = inputValues.get("Aeroplane mass: ");
 		double maxLiftCoef = inputValues.get("Maximum lift coeficient: ");
@@ -152,8 +151,8 @@ public class MarsServer extends Thread {
 		int nbIterations = inputValues.get("Iteration Number").intValue();
 		double leadingEdge = inputValues.get("Leading edge: ");
 
-                Workflow workflowObj = new Workflow(astralus,name,nbIterations,minDragCoef,aeroPlaneMass,maxLiftCoef, airSpeed, minAirSpeed, leadingEdge, chord, span);
-                workflow.addWorkflow(workflowObj);
+        Workflow workflowObj = new Workflow(astralus,name,nbIterations,minDragCoef,aeroPlaneMass,maxLiftCoef, airSpeed, minAirSpeed, leadingEdge, chord, span);
+        workflow.addWorkflow(workflowObj);
             
 		AirfoilCalculator calculator = new AirfoilCalculator(minDragCoef,aeroPlaneMass,maxLiftCoef,airSpeed,minAirSpeed);
 		calculator.optimize(span, chord, leadingEdge, nbIterations, workflowObj);

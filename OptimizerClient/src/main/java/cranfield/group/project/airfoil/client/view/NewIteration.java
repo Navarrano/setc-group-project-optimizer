@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
@@ -37,6 +39,9 @@ import javax.swing.event.ListSelectionListener;
  */
 public class NewIteration extends JPanel implements ActionListener {
 
+	protected JButton createButton;
+	protected JButton iterateButton;
+	protected JButton startButton;
     protected JPanel panelComponent = new JPanel();
     protected JPanel panelInput = new JPanel();
     protected JPanel panelPicture = new JPanel();
@@ -64,7 +69,6 @@ public class NewIteration extends JPanel implements ActionListener {
     protected JList optimizationsList;
     protected DefaultListModel<WorkflowDTO> optimizationsListModel;
     protected String workflowName;
-    JButton startButton;
     protected String[] dummyValues = {"0", "0", "0", "0", "0", "0", "0", "0", "0"};
 
     protected MarsClient client;
@@ -143,8 +147,8 @@ public class NewIteration extends JPanel implements ActionListener {
         spinnerIterNumber = addLabeledSpinner(panelInitVar, "Iteration Number", spinnerModelIterNumber);
 
         startButton = new JButton("start optimization");
-        JButton iterateButton = new JButton("iterate");
-        JButton createButton = new JButton("create new optimization");
+        iterateButton = new JButton("iterate");
+        createButton = new JButton("create new optimization");
 
         optimizationsListModel = new DefaultListModel();
         initWorkflows();
@@ -226,6 +230,8 @@ public class NewIteration extends JPanel implements ActionListener {
         startButton.addActionListener(new GetValueListener());
         createButton.addActionListener(new CreateNewOptimListener());
         iterateButton.addActionListener(new AddNewIterListener());
+        createButton.setEnabled(false);
+        iterateButton.setEnabled(false);
         optimizationsList.addListSelectionListener(new SharedListSelectionHandler());
 
     }
@@ -332,7 +338,14 @@ public class NewIteration extends JPanel implements ActionListener {
             inputs.put(labelsInitVar[2], Double.parseDouble(spinnerModelEdge.getValue().toString()));
             inputs.put("Iteration Number", Double.parseDouble(spinnerModelIterNumber.getValue().toString()));
 
-            client.sendOptimizationInputs(inputs);
+            workflowName = JOptionPane.showInputDialog(null,"Please enter the name of the workflow");
+            
+            if(workflowName == null){
+            	String currentTimestamp = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss").format(new Date());
+            	workflowName = "Optimization "+currentTimestamp;
+            }
+
+            client.sendOptimizationInputs(workflowName, inputs);
             enableComponents(panelInitVar, false);
             enableComponents(panelInput, false);
             startButton.setEnabled(false);
@@ -351,7 +364,7 @@ public class NewIteration extends JPanel implements ActionListener {
             enableComponents(panelInitVar, true);
             enableComponents(panelInput, true);
             enableComponents(panelButton, true);
-            workflowName = JOptionPane.showInputDialog(null,"Please enter a name for work flow");
+            createButton.setEnabled(false);
         }
     }
 
@@ -364,13 +377,15 @@ public class NewIteration extends JPanel implements ActionListener {
 
     class SharedListSelectionHandler implements ListSelectionListener {
 
-        public void valueChanged(ListSelectionEvent e) {;
+        public void valueChanged(ListSelectionEvent e) {
+        	createButton.setEnabled(true);
+            iterateButton.setEnabled(true);
+            startButton.setEnabled(false);
+
             int selectedOptimization = optimizationsList.getSelectedIndex();
             Long workflowId = optimizationsListModel.get(selectedOptimization).getId();
-            // Send query to server (using MarsClient) to fetch corresponding inputs & results for DB
             System.out.println("Event for indexes "
                     + optimizationsList.getSelectedIndex());
-            // TODO: Set input values using the fetched data + generating corresponding graph
             String selectedWorkflow[] = {"loading workflow", Long.toString(workflowId) };
             
 			try {
@@ -387,6 +402,7 @@ public class NewIteration extends JPanel implements ActionListener {
 				WorkflowDTO workflowData = (WorkflowDTO) in.readObject();
 				enableComponents(panelInitVar, false);
 	            enableComponents(panelInput, false);
+	            startButton.setEnabled(false);
 	            setInputValues(workflowData);
 	            panelGraph.displayOptimizationRatio(workflowData.getResults());
 			} catch (IOException | ClassNotFoundException e2) {

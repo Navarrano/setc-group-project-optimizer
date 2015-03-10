@@ -76,8 +76,8 @@ public class MarsClient extends Observable implements AutoCloseable {
 		}
 	}
 
-   public void sendOptimizationInputs(Hashtable<String, Double> inputs) {
-	   String messageForServerAction[]={"optimization"};
+   public void sendOptimizationInputs(String workflowName, Hashtable<String, Double> inputs) {
+	   String messageForServerAction[]={"optimization", workflowName};
 	   try {
 		   setChanged();
 		   notifyObservers("Sending Optimization inputs to the server: ");
