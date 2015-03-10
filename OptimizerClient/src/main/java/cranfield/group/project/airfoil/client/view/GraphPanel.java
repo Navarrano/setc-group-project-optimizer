@@ -24,10 +24,10 @@ public class GraphPanel extends JPanel
    public GraphPanel()
    {
       super();
-      resetGraph();
+      reset();
    }
    
-   public void resetGraph(){
+   public void reset(){
 	   removeAll();
 	   JFreeChart ratioGraph = ChartFactory.createXYLineChart(
     		  "", 

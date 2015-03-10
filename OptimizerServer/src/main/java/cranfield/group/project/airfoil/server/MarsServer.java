@@ -31,8 +31,6 @@ public class MarsServer extends Thread {
 	protected String username;
 	protected ConnectedUsers users;
 
-	/** The database handler. */
-	// protected DatabaseHandler databaseHandler;
     protected UserCRUDService astralUser;
 	protected LogsCRUDService logs;
 
@@ -137,17 +135,12 @@ public class MarsServer extends Thread {
 			if (msg == null) {
 				out.writeObject(msg);
 				writeUserInformationInDatabase(credentials[1]);
-				// databaseHandler.addEventLog("Connection granted : username "
-				// + credentials[1], "info", "connection");
-                                logs.addEventLog(new Logs("Connection granted : username "
+				logs.addEventLog(new Logs("Connection granted : username "
                                                 + credentials[1], "info", "connection"));
-
 				System.out.println("Good credentials");
 			} else {
 				out.writeObject(msg);
-				// databaseHandler.addEventLog("Connection denied : username "
-				// + credentials[1], "error", "connection");
-                                 logs.addEventLog(new Logs("Connection denied : username "
+				logs.addEventLog(new Logs("Connection denied : username "
                                                  + credentials[1], "error", "connection"));
 				System.out.println("Wrong credentials");
 			}
@@ -166,14 +159,7 @@ public class MarsServer extends Thread {
 	 *            the username
 	 */
 	protected void writeUserInformationInDatabase(String username) {
-		// if (databaseHandler.existsUser(username)) {
-		// databaseHandler.updateUserConnectionInformation(username);
-		// } else {
-		// databaseHandler.addNewUser(username);
-		// databaseHandler.addEventLog("User " + username
-		// + " added to AstralUsers table.", "info", "database");
-		// }
-                if (astralUser.existsUser(username)) {
+		if (astralUser.existsUser(username)) {
                     astralUser.updateUserConnectionInformation(new AstralUser(username));
 		} else {
                     astralUser.addNewUser(new AstralUser(username));
