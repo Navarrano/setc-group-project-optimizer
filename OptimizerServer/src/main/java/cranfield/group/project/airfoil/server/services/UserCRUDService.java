@@ -87,12 +87,12 @@ public class UserCRUDService extends AbstractCRUDService<Long, AstralUser>{
         }
         
         public AstralUser getUserObj(String login){
-            AstralUser userObj = new AstralUser();
+             
             EntityManager em = emf.createEntityManager();
             em.getTransaction().begin();
             List<AstralUser> results = em.createNamedQuery("existingUser").setParameter("login", login)
                                             .getResultList();
-            userObj = results.get(0);
+            AstralUser userObj = results.get(0);
             List<Workflow> worflows = em.createNamedQuery("getWorkflows").setParameter("creator", userObj)
                                             .getResultList();
             userObj.setWorkflows(worflows);

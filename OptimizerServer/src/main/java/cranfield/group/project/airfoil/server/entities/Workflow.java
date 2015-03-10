@@ -28,7 +28,8 @@ import javax.persistence.Table;
 @Entity
 @Table
 @NamedQueries({
-    @NamedQuery(name="allUsersWorflows", query = "FROM Workflow w WHERE w.creator=:creator")
+    @NamedQuery(name="allUsersWorflows", query = "FROM Workflow w WHERE w.creator=:creator"),
+    @NamedQuery(name="chosenWorkflow", query = "FROM Workflow w WHERE w.id=:id")
 })
 public class Workflow extends AbstractEntityObject<Long, Workflow> implements Serializable{
     

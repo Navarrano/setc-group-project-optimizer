@@ -40,18 +40,14 @@ public class WorkflowCRUDService extends AbstractCRUDService<Long, Workflow>{
             return userWorkflows;
         }
         
-        public List<OptimizationObject> getIdAndNameOfWorflows(AstralUser userObj){
-            List<OptimizationObject> worflowList = new ArrayList<>();
-             
+        public Workflow getWorflowWithId(Long id){
             EntityManager em = emf.createEntityManager();
             em.getTransaction().begin();
-            List<AstralUser> results = em.createNamedQuery("allUsersWorflows").setParameter("creator", userObj)
+            List<Workflow> worflows = em.createNamedQuery("chosenWorkflow").setParameter("id", id)
                                             .getResultList();
+            Workflow chosenWorflow = worflows.get(0);
             
-            //if(results.isEmpty()){
-             // existsUser = false;
-            //}
-                
-            return worflowList;
-        }
+            return chosenWorflow;
+                    
+        }    
 }
