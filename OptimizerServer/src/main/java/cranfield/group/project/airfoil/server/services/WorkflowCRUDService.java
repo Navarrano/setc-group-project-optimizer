@@ -26,10 +26,10 @@ public class WorkflowCRUDService extends AbstractCRUDService<Long, Workflow>{
         public void addWorkflow(Workflow obj){
                 EntityManager em = emf.createEntityManager();
                 em.getTransaction().begin();
-                AstralUser userObj = obj.getCreator();
-                userObj.setNextWorkflow(obj);
+                //AstralUser userObj = obj.getCreator();
+                //userObj.setNextWorkflow(obj);
                 em.persist(obj);
-                em.persist(userObj);
+                //em.persist(userObj);
                 em.getTransaction().commit();
 	}
         
