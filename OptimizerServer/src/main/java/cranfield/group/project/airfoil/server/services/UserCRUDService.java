@@ -7,6 +7,7 @@
 package cranfield.group.project.airfoil.server.services;
 
 import cranfield.group.project.airfoil.server.entities.AstralUser;
+import cranfield.group.project.airfoil.server.entities.Workflow;
 import java.sql.Timestamp;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -92,6 +93,9 @@ public class UserCRUDService extends AbstractCRUDService<Long, AstralUser>{
             List<AstralUser> results = em.createNamedQuery("existingUser").setParameter("login", login)
                                             .getResultList();
             userObj = results.get(0);
+            List<Workflow> worflows = em.createNamedQuery("getWorkflows").setParameter("creator", userObj)
+                                            .getResultList();
+            userObj.setWorkflows(worflows);
             return userObj;
         }
 }

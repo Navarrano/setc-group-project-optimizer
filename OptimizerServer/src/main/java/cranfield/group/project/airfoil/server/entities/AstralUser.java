@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.List;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -19,7 +20,8 @@ import javax.persistence.Table;
 @Entity
 @Table
 @NamedQueries({
-    @NamedQuery(name="existingUser", query = "FROM AstralUser u WHERE u.login=:login")
+    @NamedQuery(name="existingUser", query = "FROM AstralUser u WHERE u.login=:login"),
+    @NamedQuery(name="getWorkflows", query = "FROM Workflow w WHERE w.creator=:creator")
 })
 public class AstralUser extends AbstractEntityObject<Long, AstralUser> implements Serializable{
     
@@ -30,7 +32,7 @@ public class AstralUser extends AbstractEntityObject<Long, AstralUser> implement
     private Timestamp last_connection_date;
     private int nb_connections;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     private List<Workflow> workflows;
     
     public AstralUser(){}
@@ -73,12 +75,16 @@ public class AstralUser extends AbstractEntityObject<Long, AstralUser> implement
         this.nb_connections = nb_connections;
     }
 
-	public List<Workflow> getWorkflows() {
-		return workflows;
-	}
+    public List<Workflow> getWorkflows() {
+	return workflows;
+    }
 
-	public void setWorkflows(List<Workflow> workflows) {
-		this.workflows = workflows;
-	}
+    public void setWorkflows(List<Workflow> workflows) {
+	this.workflows = workflows;
+    }
+    
+    public void setNextWorkflow(Workflow workflow){
+        this.workflows.add(workflow);
+    }
   
 }

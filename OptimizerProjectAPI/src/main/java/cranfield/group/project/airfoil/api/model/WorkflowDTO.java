@@ -1,8 +1,9 @@
 package cranfield.group.project.airfoil.api.model;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class WorkflowDTO {
+public class WorkflowDTO implements Serializable{
 
 	private Long id;
 	private int nbIterations;

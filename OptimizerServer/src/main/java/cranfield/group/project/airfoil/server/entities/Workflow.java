@@ -52,7 +52,7 @@ public class Workflow extends AbstractEntityObject<Long, Workflow> implements Se
     @ManyToOne
     @JoinColumn(name="CreatorId")
     private AstralUser creator;
-    
+
     public Workflow(){}
     
     public Workflow(AstralUser creator, String name, int nbIterations, double minDragCoef, double aeroplaneMass, double maxLiftCoef, double airSpeed, double minAirSpeed, double angle, double chord, double span) {
@@ -156,5 +156,22 @@ public class Workflow extends AbstractEntityObject<Long, Workflow> implements Se
 	public void setName(String name) {
 		this.name = name;
 	}
+        
+    public List<Results> getResults() {
+        return results;
+    }
+
+    public void setResults(List<Results> results) {
+        this.results = results;
+    }
+    
+
+    public AstralUser getCreator() {
+        return creator;
+    }
+
+    public void setCreator(AstralUser creator) {
+        this.creator = creator;
+    }
    
 }

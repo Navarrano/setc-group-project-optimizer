@@ -126,7 +126,7 @@ public class MarsServer extends Thread {
 
                 Workflow workflowObj = new Workflow(astralus,name,nbIterations,minDragCoef,aeroPlaneMass,maxLiftCoef, airSpeed, minAirSpeed, leadingEdge, chord, span);
                 workflow.addWorkflow(workflowObj);
-                
+            
 		AirfoilCalculator calculator = new AirfoilCalculator(minDragCoef,aeroPlaneMass,maxLiftCoef,airSpeed,minAirSpeed);
 		calculator.optimize(span, chord, leadingEdge, nbIterations, workflowObj);
 
@@ -189,16 +189,16 @@ public class MarsServer extends Thread {
 	 *            the username
 	 */
 	protected void writeUserInformationInDatabase(String username) {
-                astralus = astralUser.getUserObj(username);
+            
                 if (astralUser.existsUser(username)) {
+                    astralus = astralUser.getUserObj(username);
                     astralUser.updateUserConnectionInformation(astralus);
 		} else {
+                    astralus = new AstralUser(username);
                     astralUser.addNewUser(astralus);
                     logs.addEventLog(new Logs("User " + username
                                               + " added to AstralUsers table.", "info", "database"));
 		}
-                //WorkflowCRUDService wor = new WorkflowCRUDService();
-                //wor.getIdAndNameOfWorflows(astralus);
 	}
 
 	/**
