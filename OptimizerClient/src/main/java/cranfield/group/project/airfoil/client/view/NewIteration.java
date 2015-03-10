@@ -20,8 +20,12 @@ import cranfield.group.project.airfoil.api.model.WorkflowDTO;
 import cranfield.group.project.airfoil.client.MarsClient;
 
 import java.awt.Font;
+import java.awt.Image;
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import javax.imageio.ImageIO;
+import javax.swing.border.EmptyBorder;
 
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -59,7 +63,6 @@ public class NewIteration extends JPanel implements ActionListener {
     protected JList optimizationsList;
     protected DefaultListModel<WorkflowDTO> optimizationsListModel;
     protected String[] dummyValues = {"0", "0", "0", "0", "0", "0", "0", "0", "0"};
-    
 
     protected MarsClient client;
 
@@ -106,9 +109,9 @@ public class NewIteration extends JPanel implements ActionListener {
         picture = new JLabel();
         picture.setFont(picture.getFont().deriveFont(Font.ITALIC));
         picture.setHorizontalAlignment(JLabel.CENTER);
+        picture.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
         updateComboLabel();
-      //  picture.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
-        picture.setPreferredSize(new Dimension(300, 100));
+        panelComboBox.setLayout(new BoxLayout(panelComboBox, BoxLayout.Y_AXIS));
         panelComboBox.add(labelComboBox);
         panelComboBox.add(comboDragCoeff);
 
@@ -117,16 +120,19 @@ public class NewIteration extends JPanel implements ActionListener {
                 160, //max
                 10);//step
         JSpinner spinnerSpan = addLabeledSpinner(panelInitVar, labelsInitVar[0], spinnerModelSpan);
+        panelInitVar.add(Box.createRigidArea(new Dimension(10, 10)));
         spinnerModelChord = new SpinnerNumberModel(20, //initial value
                 0, //min
                 35, //max
                 1);//step
         JSpinner spinnerChord = addLabeledSpinner(panelInitVar, labelsInitVar[1], spinnerModelChord);
+        panelInitVar.add(Box.createRigidArea(new Dimension(10, 10)));
         spinnerModelEdge = new SpinnerNumberModel(0, //initial value
                 0, //min
                 360, //max
                 1);//step
         JSpinner spinnerEdge = addLabeledSpinner(panelInitVar, labelsInitVar[2], spinnerModelEdge);
+        panelInitVar.add(Box.createRigidArea(new Dimension(10, 10)));
         spinnerModelIterNumber = new SpinnerNumberModel(200, //initial value
                 0, //min
                 500, //max
@@ -136,7 +142,7 @@ public class NewIteration extends JPanel implements ActionListener {
         JButton startButton = new JButton("start optimization");
         JButton iterateButton = new JButton("iterate");
         JButton createButton = new JButton("create new optimization");
-        
+
         optimizationsListModel = new DefaultListModel();
         initWorkflows();
         JScrollPane paneList = new JScrollPane(optimizationsList);
@@ -165,6 +171,8 @@ public class NewIteration extends JPanel implements ActionListener {
         panelInitVar.setBorder(titleInitVar);
         panelInitVar.setLayout(new BoxLayout(panelInitVar, BoxLayout.Y_AXIS));
 
+        panelButton.setLayout(new BoxLayout(panelButton, BoxLayout.X_AXIS));
+        panelButton.setBorder(new EmptyBorder(50, 50, 50, 50));
         panelButton.add(startButton);
         panelButton.add(Box.createRigidArea(new Dimension(10, 10)));
         panelButton.add(iterateButton);
@@ -175,10 +183,9 @@ public class NewIteration extends JPanel implements ActionListener {
         panelButton.setBorder(loweredbevel);
         TitledBorder titleButton;
         titleButton = BorderFactory.createTitledBorder(
-                loweredbevelButton, "Button area");
+                loweredbevelButton, "Buttons");
         titleButton.setTitlePosition(TitledBorder.CENTER);
         panelButton.setBorder(titleButton);
-        panelButton.setLayout(new BoxLayout(panelButton, BoxLayout.X_AXIS));
 
         Border loweredbevelList;
         loweredbevelList = BorderFactory.createLoweredBevelBorder();
@@ -192,7 +199,6 @@ public class NewIteration extends JPanel implements ActionListener {
         titleList.setTitlePosition(TitledBorder.CENTER);
         panelList.setBorder(titleList);
 
-       
         panelGraph.setLayout(new BoxLayout(panelGraph, BoxLayout.X_AXIS));
         panelGraph.setPreferredSize(new Dimension(100, 400));
 
@@ -218,10 +224,10 @@ public class NewIteration extends JPanel implements ActionListener {
         createButton.addActionListener(new CreateNewOptimListener());
         iterateButton.addActionListener(new AddNewIterListener());
         optimizationsList.addListSelectionListener(new SharedListSelectionHandler());
-   
+
     }
 
-	protected static JSpinner addLabeledSpinner(Container c, String label, SpinnerModel model) {
+    protected static JSpinner addLabeledSpinner(Container c, String label, SpinnerModel model) {
         JLabel l = new JLabel(label);
         c.add(l);
 
@@ -236,7 +242,7 @@ public class NewIteration extends JPanel implements ActionListener {
 
         return spinner;
     }
-    
+
     public void enableComponents(Container container, boolean enable) {
         Component[] components = container.getComponents();
         for (Component component : components) {
@@ -249,19 +255,19 @@ public class NewIteration extends JPanel implements ActionListener {
 
         }
     }
- 
-    public void setInputValues() {   
-         spinnerModelMass.setValue(Double.parseDouble(dummyValues[0].toString()));
-         spinnerModelLift.setValue(Double.parseDouble(dummyValues[1].toString()));
-         spinnerModelSpeed.setValue(Double.parseDouble(dummyValues[2].toString()));
-         spinnerModelMinSpeed.setValue(Double.parseDouble(dummyValues[3].toString()));
-         spinnerModelSpan.setValue(Double.parseDouble(dummyValues[4].toString()));
-         spinnerModelChord.setValue(Double.parseDouble(dummyValues[5].toString()));
-         spinnerModelEdge.setValue(Double.parseDouble(dummyValues[6].toString()));
-         spinnerModelIterNumber.setValue(Double.parseDouble(dummyValues[7].toString()));
-         spinnerIterNumber.setValue(Double.parseDouble(dummyValues[8].toString()));
-     }
-    
+
+    public void setInputValues() {
+        spinnerModelMass.setValue(Double.parseDouble(dummyValues[0].toString()));
+        spinnerModelLift.setValue(Double.parseDouble(dummyValues[1].toString()));
+        spinnerModelSpeed.setValue(Double.parseDouble(dummyValues[2].toString()));
+        spinnerModelMinSpeed.setValue(Double.parseDouble(dummyValues[3].toString()));
+        spinnerModelSpan.setValue(Double.parseDouble(dummyValues[4].toString()));
+        spinnerModelChord.setValue(Double.parseDouble(dummyValues[5].toString()));
+        spinnerModelEdge.setValue(Double.parseDouble(dummyValues[6].toString()));
+        spinnerModelIterNumber.setValue(Double.parseDouble(dummyValues[7].toString()));
+        spinnerIterNumber.setValue(Double.parseDouble(dummyValues[8].toString()));
+    }
+
     public void actionPerformed(ActionEvent e) {
         JComboBox cb = (JComboBox) e.getSource();
         String planeName = (((String[]) comboDragCoeff.getSelectedItem())[1]).toString();
@@ -271,7 +277,14 @@ public class NewIteration extends JPanel implements ActionListener {
     protected void updateComboLabel() {
 
         String planeName = (((String[]) comboDragCoeff.getSelectedItem())[1]).toString();
-        ImageIcon icon = new ImageIcon("img/" + planeName + ".png");
+        ImageIcon icon = null;
+        try {
+            Image img = ImageIO.read(new File("img/" + planeName + ".png"));
+            Image resizedImage = img.getScaledInstance(250, 170, Image.SCALE_SMOOTH);
+            icon = new ImageIcon(resizedImage);
+        } catch (IOException ex) {
+        }
+
         picture.setIcon(icon);
         picture.setToolTipText("A photo of a " + planeName.toLowerCase());
         if (icon != null) {
@@ -281,24 +294,24 @@ public class NewIteration extends JPanel implements ActionListener {
         }
     }
 
-    protected void initWorkflows(){
-    	ObjectInputStream in;
-		try {
-			in = new ObjectInputStream(client.getClientSocket().getInputStream());
-			List<WorkflowDTO> workflows = (List<WorkflowDTO>) in.readObject();
-			
-			for(WorkflowDTO w : workflows){
-				optimizationsListModel.addElement(w);
-			}
-			
-			optimizationsList = new JList<WorkflowDTO>(optimizationsListModel);
-			
-		} catch (IOException | ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+    protected void initWorkflows() {
+        ObjectInputStream in;
+        try {
+            in = new ObjectInputStream(client.getClientSocket().getInputStream());
+            List<WorkflowDTO> workflows = (List<WorkflowDTO>) in.readObject();
+
+            for (WorkflowDTO w : workflows) {
+                optimizationsListModel.addElement(w);
+            }
+
+            optimizationsList = new JList<WorkflowDTO>(optimizationsListModel);
+
+        } catch (IOException | ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
-    
+
     class GetValueListener implements ActionListener {
 
         public void actionPerformed(ActionEvent event) {
@@ -321,17 +334,17 @@ public class NewIteration extends JPanel implements ActionListener {
             enableComponents(panelInput, false);
             //enableComponents(panelButton, false);
             counter++;
-            
+
             Vector<IterationValuesSet> optimizationResults = client.receiveOptimizationOutputs();
             panelGraph.displayOptimizationRatio(optimizationResults);
         }
     }
-    
+
     class CreateNewOptimListener implements ActionListener {
 
         public void actionPerformed(ActionEvent event) {
-        	panelGraph.reset();
-        	enableComponents(panelInitVar, true);
+            panelGraph.reset();
+            enableComponents(panelInitVar, true);
             enableComponents(panelInput, true);
         }
     }
@@ -342,17 +355,18 @@ public class NewIteration extends JPanel implements ActionListener {
 
         }
     }
-    
+
     class SharedListSelectionHandler implements ListSelectionListener {
-        public void valueChanged(ListSelectionEvent e) { ;
-        	int selectedOptimization = optimizationsList.getSelectedIndex();
-        	System.out.println("Optimization Id: "+optimizationsListModel.get(selectedOptimization).getId());
-        	// Send query to server (using MarsClient) to fetch corresponding inputs & results for DB
+
+        public void valueChanged(ListSelectionEvent e) {;
+            int selectedOptimization = optimizationsList.getSelectedIndex();
+            System.out.println("Optimization Id: " + optimizationsListModel.get(selectedOptimization).getId());
+            // Send query to server (using MarsClient) to fetch corresponding inputs & results for DB
             System.out.println("Event for indexes "
-                          + optimizationsList.getSelectedIndex() );
+                    + optimizationsList.getSelectedIndex());
             // TODO: Set input values using the fetched data + generating corresponding graph
             setInputValues();
-            
+
         }
     }
 

@@ -223,7 +223,7 @@ public class AuthenticationFrame extends JFrame {
 						pass.setText("");
 						txuser.requestFocus();
 					}
-				} catch (IOException | ClassNotFoundException ex) {
+				} catch (IOException ex) {
 					ex.printStackTrace();
 				}
 			} else {
