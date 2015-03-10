@@ -83,6 +83,10 @@ public class MarsServer extends Thread {
 					System.out.println(inputValues.toString());
 					System.out.println(inputValues.get("Span: "));
 					break;
+				case "loading workflow":
+					Long workflowId = Long.parseLong(dataFromClient[1]);
+					workflow.getWorflowWithId(workflowId);
+					
 				case "quit":
 					users.remove(username);
 					isClientConnected = false;
@@ -104,8 +108,10 @@ public class MarsServer extends Thread {
 	
 	protected List<WorkflowDTO> getWorkflowList(){
 		List<WorkflowDTO> tmp = new LinkedList<>();
-		for(Workflow w : astralus.getWorkflows()){
-			tmp.add(new WorkflowDTO(w.getId(),w.getName()));
+		if(astralus.getWorkflows() != null){
+			for(Workflow w : astralus.getWorkflows()){
+				tmp.add(new WorkflowDTO(w.getId(),w.getName()));
+			}
 		}
 		return tmp;
 	}

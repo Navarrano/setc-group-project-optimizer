@@ -24,9 +24,10 @@ import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import javax.imageio.ImageIO;
 import javax.swing.border.EmptyBorder;
-
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -360,12 +361,22 @@ public class NewIteration extends JPanel implements ActionListener {
 
         public void valueChanged(ListSelectionEvent e) {;
             int selectedOptimization = optimizationsList.getSelectedIndex();
-            System.out.println("Optimization Id: " + optimizationsListModel.get(selectedOptimization).getId());
+            Long workflowId = optimizationsListModel.get(selectedOptimization).getId();
             // Send query to server (using MarsClient) to fetch corresponding inputs & results for DB
             System.out.println("Event for indexes "
                     + optimizationsList.getSelectedIndex());
             // TODO: Set input values using the fetched data + generating corresponding graph
             setInputValues();
+            String selectedWorkflow[] = { "loading workflow", Long.toString(workflowId) };
+            
+			try {
+				ObjectOutputStream out = new ObjectOutputStream(
+						client.getClientSocket().getOutputStream());
+				out.writeObject(selectedWorkflow);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 
         }
     }
