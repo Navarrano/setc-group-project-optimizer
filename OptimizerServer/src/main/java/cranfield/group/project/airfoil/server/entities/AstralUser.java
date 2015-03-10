@@ -72,4 +72,13 @@ public class AstralUser extends AbstractEntityObject<Long, AstralUser> implement
     public void setNb_connections(int nb_connections) {
         this.nb_connections = nb_connections;
     }
+
+	public List<Workflow> getWorkflows() {
+		return workflows;
+	}
+
+	public void setWorkflows(List<Workflow> workflows) {
+		this.workflows = workflows;
+	}
+  
 }

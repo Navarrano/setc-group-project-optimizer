@@ -6,16 +6,20 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Vector;
 
 import com.jcraft.jsch.JSchException;
 
+import cranfield.group.project.airfoil.api.model.AstralUserDTO;
 import cranfield.group.project.airfoil.api.model.IterationValuesSet;
+import cranfield.group.project.airfoil.api.model.ResultsDTO;
+import cranfield.group.project.airfoil.api.model.WorkflowDTO;
 import cranfield.group.project.airfoil.server.controllers.AirfoilCalculator;
 import cranfield.group.project.airfoil.server.controllers.AstralConnection;
 import cranfield.group.project.airfoil.server.entities.AstralUser;
 import cranfield.group.project.airfoil.server.entities.Logs;
-import cranfield.group.project.airfoil.server.entities.Results;
 import cranfield.group.project.airfoil.server.entities.Workflow;
 import cranfield.group.project.airfoil.server.models.ConnectedUsers;
 import cranfield.group.project.airfoil.server.services.LogsCRUDService;
@@ -30,14 +34,13 @@ public class MarsServer extends Thread {
 
 	/** The server socket */
 	protected Socket client;
-	// protected Set<String> connectedUsers;
 	protected String username;
 	protected ConnectedUsers users;
 
-        protected UserCRUDService astralUser;
+    protected UserCRUDService astralUser;
 	protected LogsCRUDService logs;
-        protected WorkflowCRUDService workflow;
-        protected AstralUser astralus;
+    protected WorkflowCRUDService workflow;
+    protected AstralUser astralus;
 
 
 	public MarsServer(Socket client, ConnectedUsers users) {
@@ -67,7 +70,11 @@ public class MarsServer extends Thread {
 
 				switch (dataFromClient[0]) {
 				case "credentials":
-					validateConnection(client, dataFromClient);
+					boolean isConnected = validateConnection(client, dataFromClient);
+					if(isConnected){
+						ObjectOutputStream out = new ObjectOutputStream(client.getOutputStream());
+						out.writeObject(getWorkflowList());
+					}
 					break;
 				case "optimization":
 					Hashtable<String, Double> inputValues = (Hashtable<String, Double>) in.readObject();
@@ -94,9 +101,18 @@ public class MarsServer extends Thread {
 			e.printStackTrace();
 		}
 	}
+	
+	protected List<WorkflowDTO> getWorkflowList(){
+		List<WorkflowDTO> tmp = new LinkedList<>();
+		for(Workflow w : astralus.getWorkflows()){
+			tmp.add(new WorkflowDTO(w.getId(),w.getName()));
+		}
+		return tmp;
+	}
 
 	private void runOptimization(Socket server, Hashtable<String, Double> inputValues) {
 		//double minDragCoef = inputValues.get("Minimal drag coefficient: ");
+		String name = "Optimization Name";
 		double minDragCoef = 0.021;
 		double aeroPlaneMass = inputValues.get("Aeroplane mass: ");
 		double maxLiftCoef = inputValues.get("Maximum lift coeficient: ");
@@ -108,7 +124,7 @@ public class MarsServer extends Thread {
 		int nbIterations = inputValues.get("Iteration Number").intValue();
 		double leadingEdge = inputValues.get("Leading edge: ");
 
-                Workflow workflowObj = new Workflow(astralus,nbIterations,minDragCoef,aeroPlaneMass,maxLiftCoef, airSpeed, minAirSpeed, leadingEdge, chord, span);
+                Workflow workflowObj = new Workflow(astralus,name,nbIterations,minDragCoef,aeroPlaneMass,maxLiftCoef, airSpeed, minAirSpeed, leadingEdge, chord, span);
                 workflow.addWorkflow(workflowObj);
                 
 		AirfoilCalculator calculator = new AirfoilCalculator(minDragCoef,aeroPlaneMass,maxLiftCoef,airSpeed,minAirSpeed);
@@ -136,7 +152,7 @@ public class MarsServer extends Thread {
 	 * @param credentials
 	 *            the credentials
 	 */
-	protected void validateConnection(Socket server, String[] credentials) {
+	protected boolean validateConnection(Socket server, String[] credentials) {
 		ObjectOutputStream out;
 
 		try {
@@ -150,6 +166,7 @@ public class MarsServer extends Thread {
 				logs.addEventLog(new Logs("Connection granted : username "
                                                 + credentials[1], "info", "connection"));
 				System.out.println("Good credentials");
+				return true;
 			} else {
 				out.writeObject(msg);
 				logs.addEventLog(new Logs("Connection denied : username "
@@ -160,6 +177,7 @@ public class MarsServer extends Thread {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return false;
 	}
 
 	/**

@@ -14,9 +14,14 @@ public class WorkflowDTO {
 	private double angle;
 	private double chord;
 	private double span;
-
+	private String name;
 	private List<ResultsDTO> results;
-
+	
+	public WorkflowDTO(Long id, String name){
+		this.id = id;
+		this.name = name;
+	}
+	
 	public Long getId() {
 		return id;
 	}
@@ -105,4 +110,8 @@ public class WorkflowDTO {
 		this.results = results;
 	}
 
+	@Override
+	public String toString(){
+		return this.name;
+	}
 }

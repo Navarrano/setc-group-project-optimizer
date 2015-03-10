@@ -12,6 +12,13 @@ public class AstralUserDTO {
 
 	private List<WorkflowDTO> workflows;
 
+	public AstralUserDTO(Long id, String login, Timestamp last_connection_date, int nb_connections){
+		this.id = id;
+		this.login = login;
+		this.last_connection_date = last_connection_date;
+		this.nb_connections = nb_connections;
+	}
+	
 	public Long getId() {
 		return id;
 	}

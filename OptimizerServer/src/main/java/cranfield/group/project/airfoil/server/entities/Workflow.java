@@ -44,6 +44,7 @@ public class Workflow extends AbstractEntityObject<Long, Workflow> implements Se
     private double angle;
     private double chord;
     private double span;
+    private String name;
     
     @OneToMany(cascade = CascadeType.PERSIST)
     private List<Results> results;
@@ -54,8 +55,9 @@ public class Workflow extends AbstractEntityObject<Long, Workflow> implements Se
     
     public Workflow(){}
     
-    public Workflow(AstralUser creator, int nbIterations, double minDragCoef, double aeroplaneMass, double maxLiftCoef, double airSpeed, double minAirSpeed, double angle, double chord, double span) {
-        this.nbIterations = nbIterations;
+    public Workflow(AstralUser creator, String name, int nbIterations, double minDragCoef, double aeroplaneMass, double maxLiftCoef, double airSpeed, double minAirSpeed, double angle, double chord, double span) {
+        this.name = name;
+    	this.nbIterations = nbIterations;
         this.minDragCoef = minDragCoef;
         this.aeroplaneMass = aeroplaneMass;
         this.maxLiftCoef = maxLiftCoef;
@@ -146,5 +148,13 @@ public class Workflow extends AbstractEntityObject<Long, Workflow> implements Se
     public void setSpan(double span) {
         this.span = span;
     }
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
    
 }

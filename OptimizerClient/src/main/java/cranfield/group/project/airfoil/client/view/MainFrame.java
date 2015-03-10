@@ -6,6 +6,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -16,6 +19,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import cranfield.group.project.airfoil.api.model.WorkflowDTO;
 import cranfield.group.project.airfoil.client.MarsClient;
 import cranfield.group.project.airfoil.client.util.ConnectionUtils;
 
@@ -130,7 +134,7 @@ public class MainFrame {
     		}
     	});
     }
-
+    
     class IterActionListener implements ActionListener {
 
         public void actionPerformed(ActionEvent e) {

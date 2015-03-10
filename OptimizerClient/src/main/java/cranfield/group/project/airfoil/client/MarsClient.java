@@ -1,6 +1,6 @@
 package cranfield.group.project.airfoil.client;
+import cranfield.group.project.airfoil.api.model.AstralUserDTO;
 import cranfield.group.project.airfoil.api.model.IterationValuesSet;
-
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -13,7 +13,8 @@ import java.util.Vector;
 
 public class MarsClient extends Observable implements AutoCloseable {
 	private Socket clientSocket;
-
+	private AstralUserDTO user;
+	
 	public MarsClient(String serverName, Integer port) throws IOException {
 		clientSocket = new Socket(serverName, port);
 		clientSocket.getOutputStream().write(1);

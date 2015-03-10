@@ -13,6 +13,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -26,6 +28,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
+import cranfield.group.project.airfoil.api.model.WorkflowDTO;
 import cranfield.group.project.airfoil.client.MarsClient;
 import cranfield.group.project.airfoil.client.util.ConnectionUtils;
 
@@ -220,7 +223,7 @@ public class AuthenticationFrame extends JFrame {
 						pass.setText("");
 						txuser.requestFocus();
 					}
-				} catch (IOException ex) {
+				} catch (IOException | ClassNotFoundException ex) {
 					ex.printStackTrace();
 				}
 			} else {

@@ -7,6 +7,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.*;
@@ -15,9 +16,12 @@ import javax.swing.border.TitledBorder;
 
 import cranfield.group.project.airfoil.api.model.IterationValuesSet;
 import cranfield.group.project.airfoil.api.model.OptimizationObject;
+import cranfield.group.project.airfoil.api.model.WorkflowDTO;
 import cranfield.group.project.airfoil.client.MarsClient;
 
 import java.awt.Font;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -53,7 +57,7 @@ public class NewIteration extends JPanel implements ActionListener {
     protected JLabel picture;
     protected int counter = 0;
     protected JList optimizationsList;
-    protected DefaultListModel<OptimizationObject> optimizationsListModel;
+    protected DefaultListModel<WorkflowDTO> optimizationsListModel;
     protected String[] dummyValues = {"0", "0", "0", "0", "0", "0", "0", "0", "0"};
     
 
@@ -134,8 +138,7 @@ public class NewIteration extends JPanel implements ActionListener {
         JButton createButton = new JButton("create new optimization");
         
         optimizationsListModel = new DefaultListModel();
-        initializeOptimizationListModel();
-        optimizationsList = new JList(optimizationsListModel);
+        initWorkflows();
         JScrollPane paneList = new JScrollPane(optimizationsList);
 
         panelInput.add(panelComboBox);
@@ -218,13 +221,6 @@ public class NewIteration extends JPanel implements ActionListener {
    
     }
 
-    protected void initializeOptimizationListModel() {
-    	// TODO: Send query to Server to fetch all the optimizations (only id and name workflow table's fields) from the DB
-    	OptimizationObject test = new OptimizationObject(1,"test Optimization");
-    	optimizationsListModel.addElement(test);
-    	
-	}
-
 	protected static JSpinner addLabeledSpinner(Container c, String label, SpinnerModel model) {
         JLabel l = new JLabel(label);
         c.add(l);
@@ -285,6 +281,24 @@ public class NewIteration extends JPanel implements ActionListener {
         }
     }
 
+    protected void initWorkflows(){
+    	ObjectInputStream in;
+		try {
+			in = new ObjectInputStream(client.getClientSocket().getInputStream());
+			List<WorkflowDTO> workflows = (List<WorkflowDTO>) in.readObject();
+			
+			for(WorkflowDTO w : workflows){
+				optimizationsListModel.addElement(w);
+			}
+			
+			optimizationsList = new JList<WorkflowDTO>(optimizationsListModel);
+			
+		} catch (IOException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
     class GetValueListener implements ActionListener {
 
         public void actionPerformed(ActionEvent event) {
@@ -306,7 +320,6 @@ public class NewIteration extends JPanel implements ActionListener {
             enableComponents(panelInitVar, false);
             enableComponents(panelInput, false);
             //enableComponents(panelButton, false);
-            optimizationsListModel.addElement(new OptimizationObject(counter,"Data from " + counter));
             counter++;
             
             Vector<IterationValuesSet> optimizationResults = client.receiveOptimizationOutputs();
