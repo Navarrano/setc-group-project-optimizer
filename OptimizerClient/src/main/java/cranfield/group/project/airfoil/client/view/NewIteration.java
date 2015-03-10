@@ -63,6 +63,8 @@ public class NewIteration extends JPanel implements ActionListener {
     protected int counter = 0;
     protected JList optimizationsList;
     protected DefaultListModel<WorkflowDTO> optimizationsListModel;
+    protected String workflowName;
+    JButton startButton;
     protected String[] dummyValues = {"0", "0", "0", "0", "0", "0", "0", "0", "0"};
 
     protected MarsClient client;
@@ -140,7 +142,7 @@ public class NewIteration extends JPanel implements ActionListener {
                 1);//step
         spinnerIterNumber = addLabeledSpinner(panelInitVar, "Iteration Number", spinnerModelIterNumber);
 
-        JButton startButton = new JButton("start optimization");
+        startButton = new JButton("start optimization");
         JButton iterateButton = new JButton("iterate");
         JButton createButton = new JButton("create new optimization");
 
@@ -333,7 +335,8 @@ public class NewIteration extends JPanel implements ActionListener {
             client.sendOptimizationInputs(inputs);
             enableComponents(panelInitVar, false);
             enableComponents(panelInput, false);
-            //enableComponents(panelButton, false);
+            startButton.setEnabled(false);
+            
             counter++;
 
             Vector<IterationValuesSet> optimizationResults = client.receiveOptimizationOutputs();
@@ -347,13 +350,15 @@ public class NewIteration extends JPanel implements ActionListener {
             panelGraph.reset();
             enableComponents(panelInitVar, true);
             enableComponents(panelInput, true);
+            enableComponents(panelButton, true);
+            workflowName = JOptionPane.showInputDialog(null,"Please enter a name for work flow");
         }
     }
 
     class AddNewIterListener implements ActionListener {
 
         public void actionPerformed(ActionEvent event) {
-
+            
         }
     }
 

@@ -95,7 +95,7 @@ public class MainFrame extends JFrame {
 
         JMenuBar menubar = new JMenuBar();
 
-        JButton iterMenu = new JButton("New Iteriation");
+        JButton iterMenu = new JButton("Optimizer");
         JButton logsMenu = new JButton("Logs");
         JButton descripMenu = new JButton("Description");
 

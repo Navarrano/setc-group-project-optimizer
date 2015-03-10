@@ -107,11 +107,11 @@ public class GraphPanel extends JPanel
 	    return dataset;
 	}
    
-   public static void main( String[ ] args ) 
+   /*public static void main( String[ ] args ) 
    {
       GraphPanel chart = new GraphPanel();
       JFrame window = new JFrame();
       window.setContentPane(chart);
       window.setVisible( true );
-   }
+   }*/
 }
