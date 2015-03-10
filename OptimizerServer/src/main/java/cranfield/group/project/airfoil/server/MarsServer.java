@@ -109,7 +109,7 @@ public class MarsServer extends Thread {
                 workflow.addWorkflow(workflowObj);
                 
 		AirfoilCalculator calculator = new AirfoilCalculator(minDragCoef,aeroPlaneMass,maxLiftCoef,airSpeed,minAirSpeed);
-		calculator.optimize(span, chord, leadingEdge, nbIterations);
+		calculator.optimize(span, chord, leadingEdge, nbIterations, workflowObj);
 
 		Vector<IterationValuesSet> optimizationResults = calculator.getIterationsValuesSet();
 		try {

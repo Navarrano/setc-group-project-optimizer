@@ -1,6 +1,8 @@
 package cranfield.group.project.airfoil.server.controllers;
 
 import cranfield.group.project.airfoil.api.model.IterationValuesSet;
+import cranfield.group.project.airfoil.server.entities.Results;
+import cranfield.group.project.airfoil.server.entities.Workflow;
 import java.util.Vector;
 
 
@@ -32,13 +34,14 @@ public class AirfoilCalculator {
 		return iterationsValuesSet;
 	}
 
-	public void optimize(double b, double c, double angle, int iterations) {
+	public void optimize(double b, double c, double angle, int iterations, Workflow workflowObj) {
 		double deltaB = STEP_SIZE;
 		double deltaC = STEP_SIZE;
 		double deltaAngle = STEP_SIZE * 1000;
 		double oldB;
 		double oldC;
 		
+                //looogssssssssssssssssssssssssssssssssssssssssss
 		for (int i = 0; i < iterations; i++) {
 			oldB = b;
 			oldC = c;
@@ -58,7 +61,11 @@ public class AirfoilCalculator {
 					* calcNumericalDerivativeByAngle(oldB, oldC, angle,
 							deltaAngle);
 			//TODO: Save current iteration results in the DB
+                        Results result =  new Results(workflowObj, iterations, angle, c, b, dragForce, liftForce, ratio);
+                        
 		}
+                
+                // logggggggggggggggggggggggggggggs
 	}
 
 	private double calcNumericalDerivativeByB(double b, double c, double angle,
@@ -129,8 +136,4 @@ public class AirfoilCalculator {
 				/ (AIR_DENSITY * calcBearingSurface(b, c) * v * v);
 	}
 	
-	public static void main(String[] args) {
-		AirfoilCalculator calculator = new AirfoilCalculator(0.0267, 3523, 1.78, 120.11, 46.18);
-		calculator.optimize(20, 20, 0, 500);
-	}
 }
