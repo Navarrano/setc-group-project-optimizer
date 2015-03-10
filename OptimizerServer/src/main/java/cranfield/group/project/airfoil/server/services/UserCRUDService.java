@@ -67,4 +67,21 @@ public class UserCRUDService extends AbstractCRUDService<Long, AstralUser>{
                 em.getTransaction().commit();
 	}
 
+        public Long getUserId(String login){
+            Long userId;
+            EntityManager em = emf.createEntityManager();
+                em.getTransaction().begin();
+                 List<AstralUser> results = em.createNamedQuery("existingUser").setParameter("login", login)
+                                            .getResultList();
+                 
+                if(results.isEmpty()){
+                    System.out.print("No user with given login");
+                    Long i =  new Long(0);
+                    userId = i;
+                } else {
+                   userId = results.get(0).getId();
+                }
+              
+                return userId;
+        }
 }

@@ -15,9 +15,11 @@ import cranfield.group.project.airfoil.server.controllers.AirfoilCalculator;
 import cranfield.group.project.airfoil.server.controllers.AstralConnection;
 import cranfield.group.project.airfoil.server.entities.AstralUser;
 import cranfield.group.project.airfoil.server.entities.Logs;
+import cranfield.group.project.airfoil.server.entities.Workflow;
 import cranfield.group.project.airfoil.server.models.ConnectedUsers;
 import cranfield.group.project.airfoil.server.services.LogsCRUDService;
 import cranfield.group.project.airfoil.server.services.UserCRUDService;
+import cranfield.group.project.airfoil.server.services.WorkflowCRUDService;
 
 /**
  * The Class MarsServer. Represents the entry point of the server, that handles
@@ -33,14 +35,17 @@ public class MarsServer extends Thread {
 
 	/** The database handler. */
 	// protected DatabaseHandler databaseHandler;
-    protected UserCRUDService astralUser;
+        protected UserCRUDService astralUser;
 	protected LogsCRUDService logs;
+        protected WorkflowCRUDService workflow;
+        protected AstralUser astralus;
 
 	public MarsServer(Socket client, ConnectedUsers users) {
 		this.client = client;
 		this.users = users;
-        logs = new LogsCRUDService();
-        astralUser = new UserCRUDService();
+                logs = new LogsCRUDService();
+                astralUser = new UserCRUDService();
+                workflow = new WorkflowCRUDService();
 	}
 
 	/*
@@ -53,6 +58,7 @@ public class MarsServer extends Thread {
 			boolean isClientConnected = true;
 
 			while (isClientConnected) {
+                            
 				ObjectInputStream in = new ObjectInputStream(
 						client.getInputStream());
 
@@ -101,6 +107,9 @@ public class MarsServer extends Thread {
 		int nbIterations = inputValues.get("Iteration Number").intValue();
 		double leadingEdge = inputValues.get("Leading edge: ");
 
+                Workflow workflowObj = new Workflow(astralus,nbIterations,minDragCoef,aeroPlaneMass,maxLiftCoef, airSpeed, minAirSpeed, leadingEdge, chord, span);
+                workflow.addWorkflow(workflowObj);
+                
 		AirfoilCalculator calculator = new AirfoilCalculator(minDragCoef,aeroPlaneMass,maxLiftCoef,airSpeed,minAirSpeed);
 		calculator.optimize(span, chord, leadingEdge, nbIterations);
 
@@ -173,13 +182,16 @@ public class MarsServer extends Thread {
 		// databaseHandler.addEventLog("User " + username
 		// + " added to AstralUsers table.", "info", "database");
 		// }
+                astralus = new AstralUser(username);
                 if (astralUser.existsUser(username)) {
-                    astralUser.updateUserConnectionInformation(new AstralUser(username));
+                    astralUser.updateUserConnectionInformation(astralus);
 		} else {
-                    astralUser.addNewUser(new AstralUser(username));
+                    astralUser.addNewUser(astralus);
                     logs.addEventLog(new Logs("User " + username
                                               + " added to AstralUsers table.", "info", "database"));
 		}
+                //WorkflowCRUDService wor = new WorkflowCRUDService();
+                //wor.getIdAndNameOfWorflows(astralus);
 	}
 
 	/**

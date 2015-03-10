@@ -6,10 +6,18 @@
 
 package cranfield.group.project.airfoil.server.entities;
 
+import java.io.Serializable;
+import java.util.List;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -18,7 +26,10 @@ import javax.persistence.Table;
  */
 @Entity
 @Table
-public class Workflow extends AbstractEntityObject<Long, Workflow>{
+@NamedQueries({
+    @NamedQuery(name="allUsersWorflows", query = "FROM Workflow w WHERE w.creator=:creator")
+})
+public class Workflow extends AbstractEntityObject<Long, Workflow> implements Serializable{
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,5 +43,107 @@ public class Workflow extends AbstractEntityObject<Long, Workflow>{
     private double angle;
     private double chord;
     private double span;
+    
+    @OneToMany
+    private List<Results> results;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="CreatorId")
+    private AstralUser creator;
+    
+    public Workflow(){}
+    
+    public Workflow(AstralUser creator, int nbIterations, double minDragCoef, double aeroplaneMass, double maxLiftCoef, double airSpeed, double minAirSpeed, double angle, double chord, double span) {
+        this.nbIterations = nbIterations;
+        this.minDragCoef = minDragCoef;
+        this.aeroplaneMass = aeroplaneMass;
+        this.maxLiftCoef = maxLiftCoef;
+        this.airSpeed = airSpeed;
+        this.minAirSpeed = minAirSpeed;
+        this.angle = angle;
+        this.chord = chord;
+        this.span = span;
+        this.creator = creator;
+    }
+    
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public int getNbIterations() {
+        return nbIterations;
+    }
+
+    public void setNbIterations(int nbIterations) {
+        this.nbIterations = nbIterations;
+    }
+
+    public double getMinDragCoef() {
+        return minDragCoef;
+    }
+
+    public void setMinDragCoef(double minDragCoef) {
+        this.minDragCoef = minDragCoef;
+    }
+
+    public double getAeroplaneMass() {
+        return aeroplaneMass;
+    }
+
+    public void setAeroplaneMass(double aeroplaneMass) {
+        this.aeroplaneMass = aeroplaneMass;
+    }
+
+    public double getMaxLiftCoef() {
+        return maxLiftCoef;
+    }
+
+    public void setMaxLiftCoef(double maxLiftCoef) {
+        this.maxLiftCoef = maxLiftCoef;
+    }
+
+    public double getAirSpeed() {
+        return airSpeed;
+    }
+
+    public void setAirSpeed(double airSpeed) {
+        this.airSpeed = airSpeed;
+    }
+
+    public double getMinAirSpeed() {
+        return minAirSpeed;
+    }
+
+    public void setMinAirSpeed(double minAirSpeed) {
+        this.minAirSpeed = minAirSpeed;
+    }
+
+    public double getAngle() {
+        return angle;
+    }
+
+    public void setAngle(double angle) {
+        this.angle = angle;
+    }
+
+    public double getChord() {
+        return chord;
+    }
+
+    public void setChord(double chord) {
+        this.chord = chord;
+    }
+
+    public double getSpan() {
+        return span;
+    }
+
+    public void setSpan(double span) {
+        this.span = span;
+    }
    
 }
