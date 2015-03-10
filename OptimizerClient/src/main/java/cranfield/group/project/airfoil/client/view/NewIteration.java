@@ -317,7 +317,9 @@ public class NewIteration extends JPanel implements ActionListener {
     class CreateNewOptimListener implements ActionListener {
 
         public void actionPerformed(ActionEvent event) {
-
+        	panelGraph.reset();
+        	enableComponents(panelInitVar, true);
+            enableComponents(panelInput, true);
         }
     }
 
