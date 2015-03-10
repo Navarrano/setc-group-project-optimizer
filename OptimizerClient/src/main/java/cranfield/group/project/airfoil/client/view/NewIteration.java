@@ -39,9 +39,9 @@ import javax.swing.event.ListSelectionListener;
  */
 public class NewIteration extends JPanel implements ActionListener {
 
-	protected JButton createButton;
-	protected JButton iterateButton;
-	protected JButton startButton;
+    protected JButton createButton;
+    protected JButton iterateButton;
+    protected JButton startButton;
     protected JPanel panelComponent = new JPanel();
     protected JPanel panelInput = new JPanel();
     protected JPanel panelPicture = new JPanel();
@@ -66,6 +66,7 @@ public class NewIteration extends JPanel implements ActionListener {
     protected String[] labelsInitVar = {"Span: ", "Chord: ", "Leading edge: "};
     protected JLabel picture;
     protected int counter = 0;
+    protected int index = 0;
     protected JList optimizationsList;
     protected DefaultListModel<WorkflowDTO> optimizationsListModel;
     protected String workflowName;
@@ -117,7 +118,6 @@ public class NewIteration extends JPanel implements ActionListener {
         picture.setFont(picture.getFont().deriveFont(Font.ITALIC));
         picture.setHorizontalAlignment(JLabel.CENTER);
         picture.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
-        updateComboLabel();
         panelComboBox.setLayout(new BoxLayout(panelComboBox, BoxLayout.Y_AXIS));
         panelComboBox.add(labelComboBox);
         panelComboBox.add(comboDragCoeff);
@@ -275,17 +275,37 @@ public class NewIteration extends JPanel implements ActionListener {
         spinnerModelEdge.setValue(workflowData.getAngle());
         spinnerModelIterNumber.setValue(workflowData.getNbIterations());
         spinnerIterNumber.setValue(workflowData.getNbIterations());
+        double a = Double.parseDouble((((String[]) comboDragCoeff.getSelectedItem())[0]));
+        comboDragCoeff.removeItemAt(index);
+
+        if (a == 0.021) {
+            comboDragCoeff.insertItemAt(new String[]{"0.021", "F-4 Phantom II"}, index);
+        } else if (a == 0.022) {
+            comboDragCoeff.insertItemAt(new String[]{"0.022", "Learjet 24"}, index);
+        } else if (a == 0.024) {
+            comboDragCoeff.insertItemAt(new String[]{"0.022", "Boeing 787"}, index);
+        } else if (a == 0.0265) {
+            comboDragCoeff.insertItemAt(new String[]{"0.0265", "Airbus A380"}, index);
+        } else if (a == 0.0265) {
+            comboDragCoeff.insertItemAt(new String[]{"0.0265", "Cessna 172-182"}, index);
+        } else if (a == 0.027) {
+            comboDragCoeff.insertItemAt(new String[]{"0.0265", "Cessna 310"}, index);
+        } else if (a == 0.031) {
+            comboDragCoeff.insertItemAt(new String[]{"0.0265", "Boeing 747"}, index);
+        } else {
+            comboDragCoeff.insertItemAt(new String[]{"0.0265", "F-104 Starfighter"}, index);
+        }
+
     }
 
     public void actionPerformed(ActionEvent e) {
         JComboBox cb = (JComboBox) e.getSource();
-        String planeName = (((String[]) comboDragCoeff.getSelectedItem())[1]).toString();
         updateComboLabel();
     }
 
     protected void updateComboLabel() {
 
-        String planeName = (((String[]) comboDragCoeff.getSelectedItem())[1]).toString();
+        String planeName = (((String[]) comboDragCoeff.getSelectedItem())[1]);
         ImageIcon icon = null;
         try {
             Image img = ImageIO.read(new File("img/" + planeName + ".png"));
@@ -325,7 +345,7 @@ public class NewIteration extends JPanel implements ActionListener {
 
         public void actionPerformed(ActionEvent event) {
             Hashtable<String, Double> inputs = new Hashtable<String, Double>();
-            String a = (((String[]) comboDragCoeff.getSelectedItem())[0]).toString();
+            String a = (((String[]) comboDragCoeff.getSelectedItem())[0]);
             Double minDragCoeff = Double.parseDouble(a);
 
             inputs.put(labelsInput[0], Double.parseDouble(spinnerModelMass.getValue().toString()));
@@ -338,18 +358,18 @@ public class NewIteration extends JPanel implements ActionListener {
             inputs.put(labelsInitVar[2], Double.parseDouble(spinnerModelEdge.getValue().toString()));
             inputs.put("Iteration Number", Double.parseDouble(spinnerModelIterNumber.getValue().toString()));
 
-            workflowName = JOptionPane.showInputDialog(null,"Please enter the name of the workflow");
-            
-            if(workflowName == null){
-            	String currentTimestamp = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss").format(new Date());
-            	workflowName = "Optimization "+currentTimestamp;
+            workflowName = JOptionPane.showInputDialog(null, "Please enter the name of the workflow");
+
+            if (workflowName == null) {
+                String currentTimestamp = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss").format(new Date());
+                workflowName = "Optimization " + currentTimestamp;
             }
 
             client.sendOptimizationInputs(workflowName, inputs);
             enableComponents(panelInitVar, false);
             enableComponents(panelInput, false);
             startButton.setEnabled(false);
-            
+
             counter++;
 
             Vector<IterationValuesSet> optimizationResults = client.receiveOptimizationOutputs();
@@ -372,13 +392,14 @@ public class NewIteration extends JPanel implements ActionListener {
 
         public void actionPerformed(ActionEvent event) {
             
+            
         }
     }
 
     class SharedListSelectionHandler implements ListSelectionListener {
 
         public void valueChanged(ListSelectionEvent e) {
-        	createButton.setEnabled(true);
+            createButton.setEnabled(true);
             iterateButton.setEnabled(true);
             startButton.setEnabled(false);
 
@@ -386,29 +407,29 @@ public class NewIteration extends JPanel implements ActionListener {
             Long workflowId = optimizationsListModel.get(selectedOptimization).getId();
             System.out.println("Event for indexes "
                     + optimizationsList.getSelectedIndex());
-            String selectedWorkflow[] = {"loading workflow", Long.toString(workflowId) };
-            
-			try {
-				ObjectOutputStream out = new ObjectOutputStream(
-						client.getClientSocket().getOutputStream());
-				out.writeObject(selectedWorkflow);
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			
+            String selectedWorkflow[] = {"loading workflow", Long.toString(workflowId)};
+
             try {
-				ObjectInputStream in = new ObjectInputStream(client.getClientSocket().getInputStream());
-				WorkflowDTO workflowData = (WorkflowDTO) in.readObject();
-				enableComponents(panelInitVar, false);
-	            enableComponents(panelInput, false);
-	            startButton.setEnabled(false);
-	            setInputValues(workflowData);
-	            panelGraph.displayOptimizationRatio(workflowData.getResults());
-			} catch (IOException | ClassNotFoundException e2) {
-				// TODO Auto-generated catch block
-				e2.printStackTrace();
-			}
+                ObjectOutputStream out = new ObjectOutputStream(
+                        client.getClientSocket().getOutputStream());
+                out.writeObject(selectedWorkflow);
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+
+            try {
+                ObjectInputStream in = new ObjectInputStream(client.getClientSocket().getInputStream());
+                WorkflowDTO workflowData = (WorkflowDTO) in.readObject();
+                enableComponents(panelInitVar, false);
+                enableComponents(panelInput, false);
+                startButton.setEnabled(false);
+                setInputValues(workflowData);
+                panelGraph.displayOptimizationRatio(workflowData.getResults());
+            } catch (IOException | ClassNotFoundException e2) {
+                // TODO Auto-generated catch block
+                e2.printStackTrace();
+            }
 
         }
     }
