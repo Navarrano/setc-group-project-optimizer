@@ -189,7 +189,7 @@ public class MarsServer extends Thread {
 	 *            the username
 	 */
 	protected void writeUserInformationInDatabase(String username) {
-                astralus = new AstralUser(username);
+                astralus = astralUser.getUserObj(username);
                 if (astralUser.existsUser(username)) {
                     astralUser.updateUserConnectionInformation(astralus);
 		} else {
