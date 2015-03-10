@@ -1,6 +1,8 @@
 package cranfield.group.project.airfoil.api.model;
 
-public class ResultsDTO {
+import java.io.Serializable;
+
+public class ResultsDTO implements Serializable {
 
 	private Long id;
 	private int iteration;
@@ -11,6 +13,19 @@ public class ResultsDTO {
 	private double liftForce;
 	private double ratio;
 
+	public ResultsDTO(){}
+	
+	public ResultsDTO(Long id, int iteration, double angle, double chord, double span, double dragForce, double liftForce, double ratio){
+		this.id = id;
+		this.iteration = iteration;
+		this.angle = angle;
+		this.chord = chord;
+		this.span = span;
+		this.dragForce = dragForce;
+		this.liftForce = liftForce;
+		this.ratio = ratio;
+	}
+	
 	public Long getId() {
 		return id;
 	}

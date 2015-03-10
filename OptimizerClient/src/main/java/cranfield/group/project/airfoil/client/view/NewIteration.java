@@ -257,16 +257,16 @@ public class NewIteration extends JPanel implements ActionListener {
         }
     }
 
-    public void setInputValues() {
-        spinnerModelMass.setValue(Double.parseDouble(dummyValues[0].toString()));
-        spinnerModelLift.setValue(Double.parseDouble(dummyValues[1].toString()));
-        spinnerModelSpeed.setValue(Double.parseDouble(dummyValues[2].toString()));
-        spinnerModelMinSpeed.setValue(Double.parseDouble(dummyValues[3].toString()));
-        spinnerModelSpan.setValue(Double.parseDouble(dummyValues[4].toString()));
-        spinnerModelChord.setValue(Double.parseDouble(dummyValues[5].toString()));
-        spinnerModelEdge.setValue(Double.parseDouble(dummyValues[6].toString()));
-        spinnerModelIterNumber.setValue(Double.parseDouble(dummyValues[7].toString()));
-        spinnerIterNumber.setValue(Double.parseDouble(dummyValues[8].toString()));
+    public void setInputValues(WorkflowDTO workflowData) {
+        spinnerModelMass.setValue(workflowData.getAeroplaneMass());
+        spinnerModelLift.setValue(workflowData.getMaxLiftCoef());
+        spinnerModelSpeed.setValue(workflowData.getAirSpeed());
+        spinnerModelMinSpeed.setValue(workflowData.getMinAirSpeed());
+        spinnerModelSpan.setValue(workflowData.getSpan());
+        spinnerModelChord.setValue(workflowData.getChord());
+        spinnerModelEdge.setValue(workflowData.getAngle());
+        spinnerModelIterNumber.setValue(workflowData.getNbIterations());
+        spinnerIterNumber.setValue(workflowData.getNbIterations());
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -366,8 +366,7 @@ public class NewIteration extends JPanel implements ActionListener {
             System.out.println("Event for indexes "
                     + optimizationsList.getSelectedIndex());
             // TODO: Set input values using the fetched data + generating corresponding graph
-            setInputValues();
-            String selectedWorkflow[] = { "loading workflow", Long.toString(workflowId) };
+            String selectedWorkflow[] = {"loading workflow", Long.toString(workflowId) };
             
 			try {
 				ObjectOutputStream out = new ObjectOutputStream(
@@ -376,6 +375,18 @@ public class NewIteration extends JPanel implements ActionListener {
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
+			}
+			
+            try {
+				ObjectInputStream in = new ObjectInputStream(client.getClientSocket().getInputStream());
+				WorkflowDTO workflowData = (WorkflowDTO) in.readObject();
+				enableComponents(panelInitVar, false);
+	            enableComponents(panelInput, false);
+	            setInputValues(workflowData);
+	            panelGraph.displayOptimizationRatio(workflowData.getResults());
+			} catch (IOException | ClassNotFoundException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
 			}
 
         }

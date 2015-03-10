@@ -23,6 +23,23 @@ public class WorkflowDTO implements Serializable{
 		this.name = name;
 	}
 	
+	public WorkflowDTO(Long id, String name, int nbIterations, double minDragCoef, 
+			double aeroplaneMass, double maxLiftCoef, double airSpeed, double minAirSpeed, 
+			double angle, double chord, double span, List<ResultsDTO> results){
+		this.id = id;
+		this.name = name;
+		this.nbIterations = nbIterations;
+		this.minDragCoef = minDragCoef;
+		this.aeroplaneMass = aeroplaneMass;
+		this.maxLiftCoef = maxLiftCoef;
+		this.airSpeed = airSpeed;
+		this.minAirSpeed = minAirSpeed;
+		this.angle = angle;
+		this.chord = chord;
+		this.span = span;
+		this.results = results;
+	}
+	
 	public Long getId() {
 		return id;
 	}

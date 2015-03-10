@@ -20,6 +20,7 @@ import cranfield.group.project.airfoil.server.controllers.AirfoilCalculator;
 import cranfield.group.project.airfoil.server.controllers.AstralConnection;
 import cranfield.group.project.airfoil.server.entities.AstralUser;
 import cranfield.group.project.airfoil.server.entities.Logs;
+import cranfield.group.project.airfoil.server.entities.Results;
 import cranfield.group.project.airfoil.server.entities.Workflow;
 import cranfield.group.project.airfoil.server.models.ConnectedUsers;
 import cranfield.group.project.airfoil.server.services.LogsCRUDService;
@@ -85,8 +86,9 @@ public class MarsServer extends Thread {
 					break;
 				case "loading workflow":
 					Long workflowId = Long.parseLong(dataFromClient[1]);
-					workflow.getWorflowWithId(workflowId);
-					
+					ObjectOutputStream out = new ObjectOutputStream(client.getOutputStream());
+					out.writeObject(getSelectedWorkflowData(workflowId));
+					break;
 				case "quit":
 					users.remove(username);
 					isClientConnected = false;
@@ -106,6 +108,26 @@ public class MarsServer extends Thread {
 		}
 	}
 	
+	protected WorkflowDTO getSelectedWorkflowData(Long workflowId) {
+		Workflow w = workflow.getWorflowWithId(workflowId);
+		List<Results> tmpResults = w.getResults();
+		
+		List<ResultsDTO> workflowResults = new LinkedList<>();
+
+		if(tmpResults != null){
+			for(Results r : tmpResults){
+				workflowResults.add(new ResultsDTO(r.getId(),r.getIteration(),r.getAngle(),r.getChord(),
+						r.getSpan(),r.getDragForce(),r.getLiftForce(),r.getRatio()));
+			}
+		}
+		
+		WorkflowDTO selectedWorkflow = new WorkflowDTO(w.getId(),w.getName(),w.getNbIterations(),w.getMinDragCoef(),
+				w.getAeroplaneMass(),w.getMaxLiftCoef(), w.getAirSpeed(), w.getMinAirSpeed(),
+				w.getAngle(), w.getChord(), w.getSpan(), workflowResults);
+		
+		return selectedWorkflow;
+	}
+
 	protected List<WorkflowDTO> getWorkflowList(){
 		List<WorkflowDTO> tmp = new LinkedList<>();
 		if(astralus.getWorkflows() != null){

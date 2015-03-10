@@ -1,5 +1,6 @@
 package cranfield.group.project.airfoil.client.view;
 
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JFrame;
@@ -18,6 +19,8 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import cranfield.group.project.airfoil.api.model.IterationValuesSet;
+import cranfield.group.project.airfoil.api.model.ResultsDTO;
+import cranfield.group.project.airfoil.api.model.WorkflowDTO;
 
 public class GraphPanel extends JPanel
 {
@@ -44,6 +47,24 @@ public class GraphPanel extends JPanel
 	  revalidate();
    }
    
+   public void displayOptimizationRatio(List<ResultsDTO> workflowResults){
+	   removeAll();
+   	   
+	   JFreeChart ratioGraph = ChartFactory.createXYLineChart(
+	    		  "", 
+	    		  "Iterations", 
+	    		  "Lift/Drag", 
+	    		  (XYDataset) createDataset(workflowResults), 
+	    		  PlotOrientation.VERTICAL,
+	    		  false, 
+	    		  false, 
+	    		  false);
+
+	   add(new ChartPanel(ratioGraph));
+	   // Update the display to make the new graph appear
+	   revalidate();
+   }
+
    public void displayOptimizationRatio(Vector<IterationValuesSet> optimizationResults){
 	   removeAll();
 	   	   
@@ -61,6 +82,18 @@ public class GraphPanel extends JPanel
 	   // Update the display to make the new graph appear
 	   revalidate();
    }
+   
+   private XYDataset createDataset(List<ResultsDTO> workflowResults) {
+	    XYSeriesCollection dataset = new XYSeriesCollection();
+	    XYSeries ratios = new XYSeries("Lift / Drag");
+	 
+	    for(int i=0; i<workflowResults.size(); i++){
+			   ratios.add(i+1, workflowResults.get(i).getRatio());
+	    }
+	   
+	    dataset.addSeries(ratios);
+	    return dataset;
+	}
 
    private XYDataset createDataset(Vector<IterationValuesSet> optimizationResults) {
 	    XYSeriesCollection dataset = new XYSeriesCollection();
