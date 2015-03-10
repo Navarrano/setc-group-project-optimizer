@@ -44,14 +44,17 @@ public class WorkflowCRUDService extends AbstractCRUDService<Long, Workflow>{
         public Workflow getWorflowWithId(Long id){
             EntityManager em = emf.createEntityManager();
             em.getTransaction().begin();
-            List<Workflow> worflows = em.createNamedQuery("chosenWorkflow").setParameter("id", id)
-                                            .getResultList();
-            Workflow chosenWorflow = worflows.get(0);
-            List<Results> results = em.createNamedQuery("resultsForWorflow").setParameter("workflow", chosenWorflow)
+            List<Workflow> workflows = em.createNamedQuery("chosenWorkflow").setParameter("id", id)
                                             .getResultList();
             
-            chosenWorflow.setResults(results);
-            return chosenWorflow;
+            Workflow chosenWorkflow = workflows.get(0);
+            if(chosenWorkflow != null){
+                List<Results> results = em.createNamedQuery("resultsForWorflow").setParameter("workflow", chosenWorkflow)
+                                                .getResultList();
+
+                chosenWorkflow.setResults(results);
+            }
+            return chosenWorkflow;
                     
         }    
 }
