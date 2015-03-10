@@ -3,6 +3,7 @@ package cranfield.group.project.airfoil.server.controllers;
 import cranfield.group.project.airfoil.api.model.IterationValuesSet;
 import cranfield.group.project.airfoil.server.entities.Results;
 import cranfield.group.project.airfoil.server.entities.Workflow;
+import cranfield.group.project.airfoil.server.services.ResultsCRUDService;
 import java.util.Vector;
 
 
@@ -18,6 +19,9 @@ public class AirfoilCalculator {
 	private final double minAirSpeed;
 	private final Vector<IterationValuesSet> iterationsValuesSet;
 	private final static double STEP_SIZE = 0.0001;
+        
+        // TODO find the beter solution to write tthis to db in marsServer and not here
+        protected ResultsCRUDService resultService;
 
 	public AirfoilCalculator(double minDragCoeff, double aeroplaneMass,
 			double maxLiftCoeff, double airSpeed, double minAirSpeed) {
@@ -28,6 +32,8 @@ public class AirfoilCalculator {
 		this.airSpeed = airSpeed;
 		this.minAirSpeed = minAirSpeed;
 		this.iterationsValuesSet = new Vector<IterationValuesSet>();
+                
+                this.resultService = new ResultsCRUDService();
 	}
 
 	public Vector<IterationValuesSet> getIterationsValuesSet() {
@@ -62,7 +68,7 @@ public class AirfoilCalculator {
 							deltaAngle);
 			//TODO: Save current iteration results in the DB
                         Results result =  new Results(workflowObj, iterations, angle, c, b, dragForce, liftForce, ratio);
-                        
+                        resultService.addResult(result);
 		}
                 
                 // logggggggggggggggggggggggggggggs

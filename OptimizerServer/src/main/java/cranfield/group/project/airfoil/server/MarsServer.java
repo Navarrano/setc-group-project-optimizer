@@ -15,6 +15,7 @@ import cranfield.group.project.airfoil.server.controllers.AirfoilCalculator;
 import cranfield.group.project.airfoil.server.controllers.AstralConnection;
 import cranfield.group.project.airfoil.server.entities.AstralUser;
 import cranfield.group.project.airfoil.server.entities.Logs;
+import cranfield.group.project.airfoil.server.entities.Results;
 import cranfield.group.project.airfoil.server.entities.Workflow;
 import cranfield.group.project.airfoil.server.models.ConnectedUsers;
 import cranfield.group.project.airfoil.server.services.LogsCRUDService;
@@ -33,10 +34,11 @@ public class MarsServer extends Thread {
 	protected String username;
 	protected ConnectedUsers users;
 
-    protected UserCRUDService astralUser;
+        protected UserCRUDService astralUser;
 	protected LogsCRUDService logs;
         protected WorkflowCRUDService workflow;
         protected AstralUser astralus;
+
 
 	public MarsServer(Socket client, ConnectedUsers users) {
 		this.client = client;
@@ -44,6 +46,7 @@ public class MarsServer extends Thread {
                 logs = new LogsCRUDService();
                 astralUser = new UserCRUDService();
                 workflow = new WorkflowCRUDService();
+                
 	}
 
 	/*

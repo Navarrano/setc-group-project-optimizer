@@ -8,6 +8,7 @@ package cranfield.group.project.airfoil.server.entities;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -36,7 +37,7 @@ public class Results extends AbstractEntityObject<Long, Results> implements Seri
     private double liftForce;
     private double ratio;
     
-    @ManyToOne(fetch=FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name="workflowId")
     private Workflow workflow;
     

@@ -8,6 +8,7 @@ package cranfield.group.project.airfoil.server.entities;
 
 import java.io.Serializable;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -44,10 +45,10 @@ public class Workflow extends AbstractEntityObject<Long, Workflow> implements Se
     private double chord;
     private double span;
     
-    @OneToMany
+    @OneToMany(cascade = CascadeType.PERSIST)
     private List<Results> results;
     
-    @ManyToOne(fetch=FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name="CreatorId")
     private AstralUser creator;
     
