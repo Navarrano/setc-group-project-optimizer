@@ -8,6 +8,7 @@ package cranfield.group.project.airfoil.server.services;
 
 import cranfield.group.project.airfoil.api.model.OptimizationObject;
 import cranfield.group.project.airfoil.server.entities.AstralUser;
+import cranfield.group.project.airfoil.server.entities.Results;
 import cranfield.group.project.airfoil.server.entities.Workflow;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +47,10 @@ public class WorkflowCRUDService extends AbstractCRUDService<Long, Workflow>{
             List<Workflow> worflows = em.createNamedQuery("chosenWorkflow").setParameter("id", id)
                                             .getResultList();
             Workflow chosenWorflow = worflows.get(0);
+            List<Results> results = em.createNamedQuery("resultsForWorflow").setParameter("workflow", chosenWorflow)
+                                            .getResultList();
             
+            chosenWorflow.setResults(results);
             return chosenWorflow;
                     
         }    
