@@ -3,35 +3,45 @@ package cranfield.group.project.airfoil.client.view;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Vector;
-
-import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.border.TitledBorder;
-
-import cranfield.group.project.airfoil.api.model.IterationValuesSet;
-import cranfield.group.project.airfoil.api.model.OptimizationObject;
-import cranfield.group.project.airfoil.api.model.WorkflowDTO;
-import cranfield.group.project.airfoil.client.MarsClient;
-
-import java.awt.Font;
-import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.List;
 
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.ListCellRenderer;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
+import cranfield.group.project.airfoil.api.model.WorkflowDTO;
+import cranfield.group.project.airfoil.client.MarsClient;
 
 /**
  *
@@ -199,7 +209,7 @@ public class NewIteration extends JPanel implements ActionListener {
         panelList.setLayout(new BoxLayout(panelList, BoxLayout.X_AXIS));
         panelList.add(paneList);
         panelList.setBorder(loweredbevelList);
-        panelList.setPreferredSize(new Dimension(200, 100));
+		panelList.setPreferredSize(new Dimension(210, 100));
         TitledBorder titleList;
         titleList = BorderFactory.createTitledBorder(
                 loweredbevelList, "Last values");
@@ -339,7 +349,7 @@ public class NewIteration extends JPanel implements ActionListener {
             inputs.put("Iteration Number", Double.parseDouble(spinnerModelIterNumber.getValue().toString()));
 
             workflowName = JOptionPane.showInputDialog(null,"Please enter the name of the workflow");
-            
+
             if(workflowName == null){
             	String currentTimestamp = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss").format(new Date());
             	workflowName = "Optimization "+currentTimestamp;
@@ -349,11 +359,16 @@ public class NewIteration extends JPanel implements ActionListener {
             enableComponents(panelInitVar, false);
             enableComponents(panelInput, false);
             startButton.setEnabled(false);
-            
+
             counter++;
 
-            Vector<IterationValuesSet> optimizationResults = client.receiveOptimizationOutputs();
-            panelGraph.displayOptimizationRatio(optimizationResults);
+			// Vector<IterationValuesSet> optimizationResults =
+			// client.receiveOptimizationOutputs();
+			WorkflowDTO workflow = client.receiveOptimizationResult();
+			optimizationsListModel.addElement(workflow);
+			panelGraph.displayOptimizationRatio(workflow.getResults());
+			createButton.setEnabled(true);
+			// panelGraph.displayOptimizationRatio(optimizationResults);
         }
     }
 
@@ -371,7 +386,7 @@ public class NewIteration extends JPanel implements ActionListener {
     class AddNewIterListener implements ActionListener {
 
         public void actionPerformed(ActionEvent event) {
-            
+
         }
     }
 
@@ -387,7 +402,7 @@ public class NewIteration extends JPanel implements ActionListener {
             System.out.println("Event for indexes "
                     + optimizationsList.getSelectedIndex());
             String selectedWorkflow[] = {"loading workflow", Long.toString(workflowId) };
-            
+
 			try {
 				ObjectOutputStream out = new ObjectOutputStream(
 						client.getClientSocket().getOutputStream());
@@ -396,7 +411,7 @@ public class NewIteration extends JPanel implements ActionListener {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			
+
             try {
 				ObjectInputStream in = new ObjectInputStream(client.getClientSocket().getInputStream());
 				WorkflowDTO workflowData = (WorkflowDTO) in.readObject();

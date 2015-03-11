@@ -4,21 +4,21 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Vector;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-
-import cranfield.group.project.airfoil.api.model.IterationValuesSet;
-import javax.swing.BorderFactory;
-import javax.swing.JComponent;
 import javax.swing.border.Border;
+
+import cranfield.group.project.airfoil.api.model.ResultsDTO;
+import cranfield.group.project.airfoil.api.model.WorkflowDTO;
 
 /**
  *
@@ -69,20 +69,38 @@ public class ShowLogs extends JPanel implements Observer {
             textAreaLogs.append(receivedData.toString() + "\n");
             textAreaLogs.setCaretPosition(textAreaLogs.getDocument()
                     .getLength());
-        } else if (arg.getClass() == Vector.class) {
-            DecimalFormat formatter = new DecimalFormat("###,###.######");
+			// } else if (arg.getClass() == Vector.class) {
+			// DecimalFormat formatter = new DecimalFormat("###,###.######");
+			//
+			// Vector<IterationValuesSet> resultValues =
+			// (Vector<IterationValuesSet>) arg;
+			//
+			// for (IterationValuesSet result : resultValues) {
+			// String resultString = "Iteration " + result.getIteration()
+			// + " => Drag: "
+			// + formatter.format(result.getDragForce()) + " Lift: "
+			// + formatter.format(result.getLiftForce()) + "\n";
+			// textAreaLogs.append(resultString);
+			// }
+			// textAreaLogs.setCaretPosition(textAreaLogs.getDocument()
+			// .getLength());
+		} else if (arg.getClass() == WorkflowDTO.class) {
+			DecimalFormat formatter = new DecimalFormat("###,###.######");
 
-            Vector<IterationValuesSet> resultValues = (Vector<IterationValuesSet>) arg;
+			// Vector<IterationValuesSet> resultValues =
+			// (Vector<IterationValuesSet>) arg;
+			WorkflowDTO dto = (WorkflowDTO) arg;
+			List<ResultsDTO> results = dto.getResults();
 
-            for (IterationValuesSet result : resultValues) {
-                String resultString = "Iteration " + result.getIteration()
-                        + " => Drag: "
-                        + formatter.format(result.getDragForce()) + " Lift: "
-                        + formatter.format(result.getLiftForce()) + "\n";
-                textAreaLogs.append(resultString);
-            }
-            textAreaLogs.setCaretPosition(textAreaLogs.getDocument()
-                    .getLength());
+			for (ResultsDTO result : results) {
+				String resultString = "Iteration " + result.getIteration()
+						+ " => Drag: "
+						+ formatter.format(result.getDragForce()) + " Lift: "
+						+ formatter.format(result.getLiftForce()) + "\n";
+				textAreaLogs.append(resultString);
+			}
+			textAreaLogs.setCaretPosition(textAreaLogs.getDocument()
+					.getLength());
         }
     }
 }
