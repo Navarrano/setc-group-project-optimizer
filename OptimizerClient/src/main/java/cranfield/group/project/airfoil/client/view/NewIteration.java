@@ -80,7 +80,6 @@ public class NewIteration extends JPanel implements ActionListener {
     protected JList optimizationsList;
     protected DefaultListModel<WorkflowDTO> optimizationsListModel;
     protected String workflowName;
-    protected String[] dummyValues = {"0", "0", "0", "0", "0", "0", "0", "0", "0"};
 
     protected MarsClient client;
 
@@ -119,7 +118,7 @@ public class NewIteration extends JPanel implements ActionListener {
         comboDragCoeff.addItem(new String[]{"0.024", "Boeing 787"});
         comboDragCoeff.addItem(new String[]{"0.0265", "Airbus A380"});
         comboDragCoeff.addItem(new String[]{"0.027", "Cessna 172-182"});
-        comboDragCoeff.addItem(new String[]{"0.027", "Cessna 310"});
+        comboDragCoeff.addItem(new String[]{"0.028", "Cessna 310"});
         comboDragCoeff.addItem(new String[]{"0.031", "Boeing 747"});
         comboDragCoeff.addItem(new String[]{"0.048", "F-104 Starfighter"});
         comboDragCoeff.addActionListener(this);
@@ -286,27 +285,15 @@ public class NewIteration extends JPanel implements ActionListener {
         spinnerModelEdge.setValue(workflowData.getAngle());
         spinnerModelIterNumber.setValue(workflowData.getNbIterations());
         spinnerIterNumber.setValue(workflowData.getNbIterations());
-        /*double a = Double.parseDouble((((String[]) comboDragCoeff.getSelectedItem())[0]));
-        comboDragCoeff.removeItemAt(index);
-
-        if (a == 0.021) {
-            comboDragCoeff.insertItemAt(new String[]{"0.021", "F-4 Phantom II"}, index);
-        } else if (a == 0.022) {
-            comboDragCoeff.insertItemAt(new String[]{"0.022", "Learjet 24"}, index);
-        } else if (a == 0.024) {
-            comboDragCoeff.insertItemAt(new String[]{"0.022", "Boeing 787"}, index);
-        } else if (a == 0.0265) {
-            comboDragCoeff.insertItemAt(new String[]{"0.0265", "Airbus A380"}, index);
-        } else if (a == 0.0265) {
-            comboDragCoeff.insertItemAt(new String[]{"0.0265", "Cessna 172-182"}, index);
-        } else if (a == 0.027) {
-            comboDragCoeff.insertItemAt(new String[]{"0.0265", "Cessna 310"}, index);
-        } else if (a == 0.031) {
-            comboDragCoeff.insertItemAt(new String[]{"0.0265", "Boeing 747"}, index);
-        } else {
-            comboDragCoeff.insertItemAt(new String[]{"0.0265", "F-104 Starfighter"}, index);
-        }*/
-
+        
+        double a = workflowData.getMinDragCoef();
+        
+        for(int i=0; i<comboDragCoeff.getItemCount(); i++){
+        	if(Double.toString(a).equalsIgnoreCase(((String[])comboDragCoeff.getItemAt(i))[0])){
+        		comboDragCoeff.setSelectedIndex(i);
+        		break;
+        	}
+        }
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -324,7 +311,9 @@ public class NewIteration extends JPanel implements ActionListener {
             icon = new ImageIcon(resizedImage);
         } catch (IOException ex) {
         }
-
+        
+        index = comboDragCoeff.getSelectedIndex();
+        
         picture.setIcon(icon);
         picture.setToolTipText("A photo of a " + planeName.toLowerCase());
         if (icon != null) {

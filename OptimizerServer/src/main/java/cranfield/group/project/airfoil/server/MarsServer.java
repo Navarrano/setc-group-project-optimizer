@@ -138,8 +138,7 @@ public class MarsServer extends Thread {
 	private void runOptimization(Socket server, String workflowName,
 			Hashtable<String, Double> inputValues) {
 		String name = workflowName;
-		// double minDragCoef = inputValues.get("Minimal drag coefficient: ");
-		double minDragCoef = 0.021;
+		double minDragCoef = inputValues.get("Minimal drag coefficient: ");
 		double aeroPlaneMass = inputValues.get("Aeroplane mass: ");
 		double maxLiftCoef = inputValues.get("Maximum lift coeficient: ");
 		double airSpeed = inputValues.get("Air speed: ");
