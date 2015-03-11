@@ -162,6 +162,7 @@ public class NewIteration extends JPanel implements ActionListener {
 
         optimizationsListModel = new DefaultListModel();
         initWorkflows();
+        updateComboLabel();
         JScrollPane paneList = new JScrollPane(optimizationsList);
 
         panelInput.add(panelComboBox);
@@ -285,7 +286,7 @@ public class NewIteration extends JPanel implements ActionListener {
         spinnerModelEdge.setValue(workflowData.getAngle());
         spinnerModelIterNumber.setValue(workflowData.getNbIterations());
         spinnerIterNumber.setValue(workflowData.getNbIterations());
-        double a = Double.parseDouble((((String[]) comboDragCoeff.getSelectedItem())[0]));
+        /*double a = Double.parseDouble((((String[]) comboDragCoeff.getSelectedItem())[0]));
         comboDragCoeff.removeItemAt(index);
 
         if (a == 0.021) {
@@ -304,7 +305,7 @@ public class NewIteration extends JPanel implements ActionListener {
             comboDragCoeff.insertItemAt(new String[]{"0.0265", "Boeing 747"}, index);
         } else {
             comboDragCoeff.insertItemAt(new String[]{"0.0265", "F-104 Starfighter"}, index);
-        }
+        }*/
 
     }
 
