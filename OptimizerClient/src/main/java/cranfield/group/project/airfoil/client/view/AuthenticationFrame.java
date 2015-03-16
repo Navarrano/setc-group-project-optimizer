@@ -209,7 +209,7 @@ public class AuthenticationFrame extends JFrame {
 
 			if (ConnectionUtils.checkHostAvailability(host, port)) {
 				try {
-					client = new MarsClient(host, port);
+					client = new MarsClient(host, port);					
 					String msg = client.areValidatedCredentials(puname, ppaswd);
 					if (msg == null) {
 						MainFrame mainFrame = new MainFrame(client, host, port);

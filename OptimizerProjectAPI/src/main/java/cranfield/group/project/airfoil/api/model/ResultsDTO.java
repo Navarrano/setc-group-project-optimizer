@@ -14,6 +14,15 @@ public class ResultsDTO implements Serializable {
 	private double ratio;
 
 	public ResultsDTO(){}
+
+	public ResultsDTO(Long id){
+		this.id = id;
+	}
+
+	public ResultsDTO(int iteration, double ratio){
+		this.iteration = iteration;
+		this.ratio = ratio;
+	}
 	
 	public ResultsDTO(Long id, int iteration, double angle, double chord, double span, double dragForce, double liftForce, double ratio){
 		this.id = id;
@@ -88,5 +97,11 @@ public class ResultsDTO implements Serializable {
 
 	public void setRatio(double ratio) {
 		this.ratio = ratio;
+	}
+	
+	@Override
+	public String toString(){
+		String res = "Iteration: "+this.iteration+" Ratio: "+this.ratio+"\n";
+		return res;
 	}
 }

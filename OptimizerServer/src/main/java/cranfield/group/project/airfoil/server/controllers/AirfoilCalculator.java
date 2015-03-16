@@ -2,6 +2,8 @@ package cranfield.group.project.airfoil.server.controllers;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
 import cranfield.group.project.airfoil.api.model.ResultsDTO;
 import cranfield.group.project.airfoil.server.entities.Results;
@@ -10,7 +12,7 @@ import cranfield.group.project.airfoil.server.services.ResultsCRUDService;
 
 
 
-public class AirfoilCalculator {
+public class AirfoilCalculator extends Observable {
 
 	private static final double AIR_DENSITY = 1.225;
 	private static final double GRAVITATIONAL_ACCELERATION = 9.81;
@@ -19,12 +21,11 @@ public class AirfoilCalculator {
 	private final double maxLiftCoeff;
 	private final double airSpeed;
 	private final double minAirSpeed;
-	// private final Vector<IterationValuesSet> iterationsValuesSet;
 	private final static double STEP_SIZE = 0.0001;
-	private final List<ResultsDTO> results;
+//	private final List<ResultsDTO> results;
 
-        // TODO find the beter solution to write tthis to db in marsServer and not here
-        protected ResultsCRUDService resultService;
+    // TODO find the beter solution to write tthis to db in marsServer and not here
+    protected ResultsCRUDService resultService;
 
 	public AirfoilCalculator(double minDragCoeff, double aeroplaneMass,
 			double maxLiftCoeff, double airSpeed, double minAirSpeed) {
@@ -34,17 +35,8 @@ public class AirfoilCalculator {
 		this.maxLiftCoeff = maxLiftCoeff;
 		this.airSpeed = airSpeed;
 		this.minAirSpeed = minAirSpeed;
-		// this.iterationsValuesSet = new Vector<IterationValuesSet>();
-		this.results = new LinkedList<>();
 
-                this.resultService = new ResultsCRUDService();
-	}
-
-	// public Vector<IterationValuesSet> getIterationsValuesSet() {
-	// return iterationsValuesSet;
-	// }
-	public List<ResultsDTO> getResults() {
-		return results;
+        this.resultService = new ResultsCRUDService();
 	}
 
 	public void optimize(double b, double c, double angle, int iterations, Workflow workflowObj) {
@@ -54,7 +46,7 @@ public class AirfoilCalculator {
 		double oldB;
 		double oldC;
 
-                //looogssssssssssssssssssssssssssssssssssssssssss
+        //TODO: Logs
 		for (int i = 0; i < iterations; i++) {
 			oldB = b;
 			oldC = c;
@@ -64,8 +56,6 @@ public class AirfoilCalculator {
 			System.out.format(
 "%d ==> Drag force: %.4f, Lift force: %.4f, RATIO: %.8f, b: %.3f c: %.3f Angle: %.8f\n",
 							i, dragForce, liftForce, ratio, b, c, angle);
-			// iterationsValuesSet.add(new
-			// IterationValuesSet(i+1,c,b,angle,dragForce,liftForce,ratio));
 			b = b - STEP_SIZE
 					* calcNumericalDerivativeByB(oldB, oldC, angle, deltaB);
 			c = c - STEP_SIZE
@@ -74,14 +64,20 @@ public class AirfoilCalculator {
 					- STEP_SIZE
 					* calcNumericalDerivativeByAngle(oldB, oldC, angle,
 							deltaAngle);
-			//TODO: Save current iteration results in the DB
-                        Results result =  new Results(workflowObj, iterations, angle, c, b, dragForce, liftForce, ratio);
-                        resultService.addResult(result);
-			results.add(new ResultsDTO(result.getId(), iterations, angle, c, b,
-					dragForce, liftForce, ratio));
+			
+			//Save current iteration results in the DB
+            Results result =  new Results(workflowObj, i+1, angle, c, b, dragForce, liftForce, ratio);
+            resultService.addResult(result);
+            
+            //Send iteration results to client
+            ResultsDTO resultToBeSent = new ResultsDTO(result.getId(), i+1, angle, c, b,
+					dragForce, liftForce, ratio);
+            setChanged();
+            notifyObservers(resultToBeSent);
 		}
-
-                // logggggggggggggggggggggggggggggs
+        setChanged();
+        notifyObservers("End Optimization");
+		//TODO: Logs
 	}
 
 	private double calcNumericalDerivativeByB(double b, double c, double angle,

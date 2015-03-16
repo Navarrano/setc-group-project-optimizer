@@ -244,6 +244,7 @@ public class NewIteration extends JPanel implements ActionListener {
         iterateButton.setEnabled(false);
         optimizationsList.addListSelectionListener(new SharedListSelectionHandler());
 
+        client.addObserver(panelGraph);
     }
 
     protected static JSpinner addLabeledSpinner(Container c, String label, SpinnerModel model) {
@@ -371,11 +372,10 @@ public class NewIteration extends JPanel implements ActionListener {
 
             counter++;
 
-			// Vector<IterationValuesSet> optimizationResults =
-			// client.receiveOptimizationOutputs();
-			WorkflowDTO workflow = client.receiveOptimizationResult();
-			optimizationsListModel.addElement(workflow);
-			panelGraph.displayOptimizationRatio(workflow.getResults());
+            //client.receiveOptimizationResult();
+			//TODO: Fix add new workflow in the list 
+            //optimizationsListModel.addElement(workflow);
+			//panelGraph.displayOptimizationRatio(workflow.getResults());
 			createButton.setEnabled(true);
 			// panelGraph.displayOptimizationRatio(optimizationResults);
         }

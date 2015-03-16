@@ -8,6 +8,8 @@ import java.net.SocketTimeoutException;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
 import com.jcraft.jsch.JSchException;
 
@@ -28,7 +30,7 @@ import cranfield.group.project.airfoil.server.services.WorkflowCRUDService;
  * The Class MarsServer. Represents the entry point of the server, that handles
  * the communication with the clients.
  */
-public class MarsServer extends Thread {
+public class MarsServer extends Thread implements Observer{
 
 	/** The server socket */
 	protected Socket client;
@@ -156,22 +158,10 @@ public class MarsServer extends Thread {
 
 		AirfoilCalculator calculator = new AirfoilCalculator(minDragCoef,
 				aeroPlaneMass, maxLiftCoef, airSpeed, minAirSpeed);
+		calculator.addObserver(this);
+		
 		calculator
 				.optimize(span, chord, leadingEdge, nbIterations, workflowObj);
-
-		// Vector<IterationValuesSet> optimizationResults = calculator
-		// .getIterationsValuesSet();
-		List<ResultsDTO> results = calculator.getResults();
-		try {
-			ObjectOutputStream out = new ObjectOutputStream(
-					server.getOutputStream());
-			// out.writeObject(optimizationResults);
-			out.writeObject(prepareWorkflowDTO(workflowObj, results));
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	private WorkflowDTO prepareWorkflowDTO(Workflow w, List<ResultsDTO> results) {
@@ -198,7 +188,6 @@ public class MarsServer extends Thread {
 			out = new ObjectOutputStream(server.getOutputStream());
 
 			String msg = checkCredentials(credentials);
-
 			if (msg == null) {
 				out.writeObject(msg);
 				writeUserInformationInDatabase(credentials[1]);
@@ -261,5 +250,26 @@ public class MarsServer extends Thread {
 			return e.getMessage();
 		}
 		return null;
+	}
+
+	@Override
+	public void update(Observable o, Object arg) {
+    	ObjectOutputStream out; 
+    	try {
+			out = new ObjectOutputStream(
+					client.getOutputStream());
+			if (arg.getClass() == ResultsDTO.class) {
+	        	ResultsDTO resultsToBeSent = (ResultsDTO) arg;
+				out.writeObject(resultsToBeSent);
+				
+	        } else if (((String) arg).equalsIgnoreCase("End Optimization")){
+				out = new ObjectOutputStream(client.getOutputStream());
+					out.writeObject(new ResultsDTO((long) -1));
+	        }
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+        
 	}
 }

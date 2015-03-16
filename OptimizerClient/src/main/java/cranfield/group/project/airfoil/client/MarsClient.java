@@ -6,11 +6,13 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Hashtable;
 import java.util.Observable;
+import java.util.Observer;
 
 import cranfield.group.project.airfoil.api.model.AstralUserDTO;
+import cranfield.group.project.airfoil.api.model.ResultsDTO;
 import cranfield.group.project.airfoil.api.model.WorkflowDTO;
 
-public class MarsClient extends Observable implements AutoCloseable {
+public class MarsClient extends Observable implements AutoCloseable, Observer {
 	private Socket clientSocket;
 	private AstralUserDTO user;
 
@@ -93,44 +95,32 @@ public class MarsClient extends Observable implements AutoCloseable {
 		}
 	}
 
-	public WorkflowDTO receiveOptimizationResult() {
-		try {
-			ObjectInputStream in = new ObjectInputStream(
-					clientSocket.getInputStream());
-			WorkflowDTO dto = (WorkflowDTO) in.readObject();
-			setChanged();
-			notifyObservers("Receiving Optimization results from the server: ");
-			setChanged();
-			notifyObservers(dto);
-			setChanged();
-			notifyObservers("End of Optimization results reception");
-			return dto;
-		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
+	public void receiveOptimizationResult() {
+		boolean receivingData = true;
+		
+		while(receivingData){
+			try {
+				ObjectInputStream in = new ObjectInputStream(
+						clientSocket.getInputStream());
+				ResultsDTO receivedResults = (ResultsDTO) in.readObject();
+				
+				if (receivedResults.getId() == -1)
+					receivingData = false;
+				else {
+					System.out.println("In receivedOptimization: "+receivedResults.toString());
+					setChanged();
+					notifyObservers(receivedResults);
+				}
+			} catch (IOException | ClassNotFoundException e) {
+				e.printStackTrace();
+			}
 		}
-		return null;
 	}
 
-	// public Vector<IterationValuesSet> receiveOptimizationOutputs() {
-	// ObjectInputStream in;
-	// Vector<IterationValuesSet> optimizationResults = new
-	// Vector<IterationValuesSet>();
-	// try {
-	// in = new ObjectInputStream(clientSocket.getInputStream());
-	// optimizationResults = (Vector<IterationValuesSet>) in.readObject();
-	// setChanged();
-	// notifyObservers("Receiving Optimization results from the server: ");
-	// setChanged();
-	// notifyObservers(optimizationResults);
-	// setChanged();
-	// notifyObservers("End of Optimization results reception");
-	// } catch (IOException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// } catch (ClassNotFoundException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// }
-	// return optimizationResults;
-	// }
+	@Override
+	public void update(Observable o, Object arg) {
+		if(((String) arg).equalsIgnoreCase("Data reception")){
+			receiveOptimizationResult();
+		}
+	}
 }
