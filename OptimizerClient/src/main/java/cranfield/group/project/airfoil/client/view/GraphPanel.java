@@ -6,7 +6,7 @@ import java.util.Observer;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.plaf.SliderUI;
+import javax.swing.WindowConstants;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -21,7 +21,7 @@ import cranfield.group.project.airfoil.api.model.ResultsDTO;
 public class GraphPanel extends JPanel implements Observer
 {
 	protected XYSeriesCollection graphData;
-	
+
 	public GraphPanel()
 	{
 		super();
@@ -33,7 +33,8 @@ public class GraphPanel extends JPanel implements Observer
 	    graphData = new XYSeriesCollection(new XYSeries("Lift / Drag"));
 		removeAll();
 		JFreeChart ratioGraph = ChartFactory.createXYLineChart(
-				"", "Iterations", "Lift/Drag", null,PlotOrientation.VERTICAL,
+"",
+				"Iterations", "Lift/Drag", graphData, PlotOrientation.VERTICAL,
 				false, false, false);
 
 		add(new ChartPanel(ratioGraph));
@@ -54,7 +55,7 @@ public class GraphPanel extends JPanel implements Observer
 	   // Update the display to make the new graph appear
 	   revalidate();
    }
-   
+
    private void updateGraph(){
 	   removeAll();
 
@@ -70,10 +71,10 @@ public class GraphPanel extends JPanel implements Observer
 	   revalidate();
    }
 
-   protected void addValueToDataset(ResultsDTO result){
+	public void addValueToDataset(ResultsDTO result) {
 	   graphData.getSeries(0).add(result.getIteration(),result.getRatio());
    }
-   
+
    private XYDataset createDataset(List<ResultsDTO> workflowResults) {
 	    XYSeriesCollection dataset = new XYSeriesCollection();
 	    XYSeries ratios = new XYSeries("Lift / Drag");
@@ -94,21 +95,23 @@ public class GraphPanel extends JPanel implements Observer
 			updateGraph();
 		}
 	}
-	
+
 	public static void main(String[] args) {
 		GraphPanel graph = new GraphPanel();
 		JFrame window = new JFrame();
 		window.add(graph);
 		window.setVisible(true);
 		window.setSize(800, 800);
-		for(int i=0;i<6;i++){
+		window.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		graph.reset();
+		for (int i = 0; i < 10; i++) {
 			double ratio = 5.7 + (double)i;
 			ResultsDTO results = new ResultsDTO(i+1,ratio);
-		
+
 			graph.addValueToDataset(results);
-			graph.updateGraph();
+			// graph.updateGraph();
 			try {
-				Thread.sleep(3000);
+				Thread.sleep(500);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

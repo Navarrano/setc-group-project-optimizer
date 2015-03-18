@@ -40,6 +40,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import cranfield.group.project.airfoil.api.model.ResultsDTO;
 import cranfield.group.project.airfoil.api.model.WorkflowDTO;
 import cranfield.group.project.airfoil.client.MarsClient;
 
@@ -286,9 +287,9 @@ public class NewIteration extends JPanel implements ActionListener {
         spinnerModelEdge.setValue(workflowData.getAngle());
         spinnerModelIterNumber.setValue(workflowData.getNbIterations());
         spinnerIterNumber.setValue(workflowData.getNbIterations());
-        
+
         double a = workflowData.getMinDragCoef();
-        
+
         for(int i=0; i<comboDragCoeff.getItemCount(); i++){
         	if(Double.toString(a).equalsIgnoreCase(((String[])comboDragCoeff.getItemAt(i))[0])){
         		comboDragCoeff.setSelectedIndex(i);
@@ -312,9 +313,9 @@ public class NewIteration extends JPanel implements ActionListener {
             icon = new ImageIcon(resizedImage);
         } catch (IOException ex) {
         }
-        
+
         index = comboDragCoeff.getSelectedIndex();
-        
+
         picture.setIcon(icon);
         picture.setToolTipText("A photo of a " + planeName.toLowerCase());
         if (icon != null) {
@@ -372,11 +373,42 @@ public class NewIteration extends JPanel implements ActionListener {
 
             counter++;
 
+			WorkflowDTO workflow = null;
+			try {
+				ObjectInputStream in = new ObjectInputStream(client
+						.getClientSocket().getInputStream());
+				workflow = (WorkflowDTO) in.readObject();
+				optimizationsListModel.addElement(workflow);
+			} catch (IOException | ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+
+			new Thread(new Runnable() {
+
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					boolean cont = true;
+					panelGraph.reset();
+					while (cont) {
+						ResultsDTO results = client.receiveResult();
+						if (results == null || results.getId() == -1) {
+							cont = false;
+						} else {
+							// System.out.println("In receivedOptimization: "
+							// + results.toString());
+							panelGraph.addValueToDataset(results);
+						}
+					}
+					createButton.setEnabled(true);
+				}
+			}).start();
+
             //client.receiveOptimizationResult();
-			//TODO: Fix add new workflow in the list 
+			// TODO: Fix add new workflow in the list
             //optimizationsListModel.addElement(workflow);
 			//panelGraph.displayOptimizationRatio(workflow.getResults());
-			createButton.setEnabled(true);
+
 			// panelGraph.displayOptimizationRatio(optimizationResults);
         }
     }
@@ -396,7 +428,7 @@ public class NewIteration extends JPanel implements ActionListener {
 
         public void actionPerformed(ActionEvent event) {
 
-            
+
         }
     }
 

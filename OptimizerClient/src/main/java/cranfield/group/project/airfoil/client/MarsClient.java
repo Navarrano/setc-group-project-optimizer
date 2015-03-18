@@ -10,7 +10,6 @@ import java.util.Observer;
 
 import cranfield.group.project.airfoil.api.model.AstralUserDTO;
 import cranfield.group.project.airfoil.api.model.ResultsDTO;
-import cranfield.group.project.airfoil.api.model.WorkflowDTO;
 
 public class MarsClient extends Observable implements AutoCloseable, Observer {
 	private Socket clientSocket;
@@ -95,15 +94,27 @@ public class MarsClient extends Observable implements AutoCloseable, Observer {
 		}
 	}
 
+	public ResultsDTO receiveResult() {
+		try {
+			ObjectInputStream in = new ObjectInputStream(
+					clientSocket.getInputStream());
+			ResultsDTO receivedResults = (ResultsDTO) in.readObject();
+			return receivedResults;
+		} catch (IOException | ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 	public void receiveOptimizationResult() {
 		boolean receivingData = true;
-		
+
 		while(receivingData){
 			try {
 				ObjectInputStream in = new ObjectInputStream(
 						clientSocket.getInputStream());
 				ResultsDTO receivedResults = (ResultsDTO) in.readObject();
-				
+
 				if (receivedResults.getId() == -1)
 					receivingData = false;
 				else {
@@ -119,8 +130,8 @@ public class MarsClient extends Observable implements AutoCloseable, Observer {
 
 	@Override
 	public void update(Observable o, Object arg) {
-		if(((String) arg).equalsIgnoreCase("Data reception")){
-			receiveOptimizationResult();
-		}
+		// if(((String) arg).equalsIgnoreCase("Data reception")){
+		// receiveOptimizationResult();
+		// }
 	}
 }

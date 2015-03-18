@@ -156,10 +156,18 @@ public class MarsServer extends Thread implements Observer{
 				leadingEdge, chord, span);
 		workflow.addWorkflow(workflowObj);
 
+		try {
+			ObjectOutputStream out = new ObjectOutputStream(
+					client.getOutputStream());
+			out.writeObject(prepareWorkflowDTO(workflowObj, null));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 		AirfoilCalculator calculator = new AirfoilCalculator(minDragCoef,
 				aeroPlaneMass, maxLiftCoef, airSpeed, minAirSpeed);
 		calculator.addObserver(this);
-		
+
 		calculator
 				.optimize(span, chord, leadingEdge, nbIterations, workflowObj);
 	}
@@ -254,22 +262,21 @@ public class MarsServer extends Thread implements Observer{
 
 	@Override
 	public void update(Observable o, Object arg) {
-    	ObjectOutputStream out; 
+		ObjectOutputStream out;
     	try {
 			out = new ObjectOutputStream(
 					client.getOutputStream());
 			if (arg.getClass() == ResultsDTO.class) {
 	        	ResultsDTO resultsToBeSent = (ResultsDTO) arg;
 				out.writeObject(resultsToBeSent);
-				
+
 	        } else if (((String) arg).equalsIgnoreCase("End Optimization")){
-				out = new ObjectOutputStream(client.getOutputStream());
-					out.writeObject(new ResultsDTO((long) -1));
+				out.writeObject(new ResultsDTO((long) -1));
 	        }
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-        
+
 	}
 }
