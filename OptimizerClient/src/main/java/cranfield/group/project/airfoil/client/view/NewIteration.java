@@ -74,7 +74,7 @@ public class NewIteration extends JPanel implements ActionListener {
     protected SpinnerModel spinnerModelEdge;
     protected SpinnerModel spinnerModelIterNumber;
     protected JSpinner spinnerIterNumber;
-    protected String[] labelsInitVar = {"Span: ", "Chord: ", "Leading edge: "};
+    protected String[] labelsInitVar = {"Span: ", "Chord: "};
     protected JLabel picture;
     protected int counter = 0;
     protected int index = 0;
@@ -132,30 +132,25 @@ public class NewIteration extends JPanel implements ActionListener {
         panelComboBox.add(labelComboBox);
         panelComboBox.add(comboDragCoeff);
 
+        panelInitVar.add(Box.createRigidArea(new Dimension(10, 10)));
         spinnerModelSpan = new SpinnerNumberModel(20, //initial value
                 0, //min
                 160, //max
                 10);//step
         JSpinner spinnerSpan = addLabeledSpinner(panelInitVar, labelsInitVar[0], spinnerModelSpan);
-        panelInitVar.add(Box.createRigidArea(new Dimension(10, 10)));
+        panelInitVar.add(Box.createRigidArea(new Dimension(10, 20)));
         spinnerModelChord = new SpinnerNumberModel(20, //initial value
                 0, //min
                 35, //max
                 1);//step
         JSpinner spinnerChord = addLabeledSpinner(panelInitVar, labelsInitVar[1], spinnerModelChord);
-        panelInitVar.add(Box.createRigidArea(new Dimension(10, 10)));
-        spinnerModelEdge = new SpinnerNumberModel(0, //initial value
-                0, //min
-                360, //max
-                1);//step
-        JSpinner spinnerEdge = addLabeledSpinner(panelInitVar, labelsInitVar[2], spinnerModelEdge);
-        panelInitVar.add(Box.createRigidArea(new Dimension(10, 10)));
+        panelInitVar.add(Box.createRigidArea(new Dimension(10, 20)));
         spinnerModelIterNumber = new SpinnerNumberModel(200, //initial value
                 0, //min
                 500, //max
                 1);//step
         spinnerIterNumber = addLabeledSpinner(panelInitVar, "Iteration Number", spinnerModelIterNumber);
-
+        panelInitVar.add(Box.createRigidArea(new Dimension(10, 10)));
         startButton = new JButton("start optimization");
         iterateButton = new JButton("iterate");
         createButton = new JButton("create new optimization");
