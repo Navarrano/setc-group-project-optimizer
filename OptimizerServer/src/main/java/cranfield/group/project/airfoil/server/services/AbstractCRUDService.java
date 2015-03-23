@@ -8,11 +8,10 @@ import javax.persistence.EntityManagerFactory;
 
 import cranfield.group.project.airfoil.server.entities.AbstractEntityObject;
 
-
 public abstract class AbstractCRUDService<K extends Serializable, T extends AbstractEntityObject<K, T>> {
 
-	private final static EntityManagerFactory emf;
-	private final Class<T> entityClass;
+	protected final static EntityManagerFactory emf;
+	protected final Class<T> entityClass;
 
 	static {
 		emf = EntityFactoryProvider.getInstance().createEntityManagerFactory();
@@ -25,12 +24,13 @@ public abstract class AbstractCRUDService<K extends Serializable, T extends Abst
 		return obj;
 	}
 
-	public T persist(T entity){
+	public T persist(T entity) {
 		EntityManager em = emf.createEntityManager();
 		em.getTransaction().begin();
 		em.persist(entity);
 		em.getTransaction().commit();
-                return entity;
+		em.flush();
+		return entity;
 	}
 
 	public AbstractCRUDService() {

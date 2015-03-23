@@ -8,13 +8,13 @@ package cranfield.group.project.airfoil.server.entities;
 
 import java.io.Serializable;
 import java.util.List;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -33,7 +33,7 @@ import javax.persistence.Table;
     @NamedQuery(name="resultsForWorflow", query = "FROM Results r WHERE r.workflow=:workflow")
 })
 public class Workflow extends AbstractEntityObject<Long, Workflow> implements Serializable{
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -47,15 +47,15 @@ public class Workflow extends AbstractEntityObject<Long, Workflow> implements Se
     private double chord;
     private double span;
     private String name;
-    
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "workflow", fetch = FetchType.LAZY)
     private List<Results> results;
-    
+
     @ManyToOne
     private AstralUser creator;
 
     public Workflow(){}
-    
+
     public Workflow(AstralUser creator, String name, int nbIterations, double minDragCoef, double aeroplaneMass, double maxLiftCoef, double airSpeed, double minAirSpeed, double angle, double chord, double span) {
         this.name = name;
     	this.nbIterations = nbIterations;
@@ -69,7 +69,7 @@ public class Workflow extends AbstractEntityObject<Long, Workflow> implements Se
         this.span = span;
         this.creator = creator;
     }
-    
+
     public Long getId() {
         return id;
     }
@@ -157,7 +157,7 @@ public class Workflow extends AbstractEntityObject<Long, Workflow> implements Se
 	public void setName(String name) {
 		this.name = name;
 	}
-        
+
     public List<Results> getResults() {
         return results;
     }
@@ -165,7 +165,7 @@ public class Workflow extends AbstractEntityObject<Long, Workflow> implements Se
     public void setResults(List<Results> results) {
         this.results = results;
     }
-    
+
 
     public AstralUser getCreator() {
         return creator;
@@ -174,5 +174,5 @@ public class Workflow extends AbstractEntityObject<Long, Workflow> implements Se
     public void setCreator(AstralUser creator) {
         this.creator = creator;
     }
-   
+
 }

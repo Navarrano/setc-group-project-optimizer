@@ -7,15 +7,14 @@
 package cranfield.group.project.airfoil.server.entities;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
-import javax.persistence.CascadeType;
+
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 /**
@@ -24,8 +23,11 @@ import javax.persistence.Table;
  */
 @Entity
 @Table
+@NamedQueries(value = { @NamedQuery(name = Results.FIND_LATEST_RESULT_FOR_WORKFLOW, query = "select r from Results r WHERE r.workflow.id = :id and r.iteration = (select max(rr.iteration) from Results rr where rr.workflow.id = :id)") })
 public class Results extends AbstractEntityObject<Long, Results> implements Serializable{
-    
+
+	public static final String FIND_LATEST_RESULT_FOR_WORKFLOW = "Results.FindLatestResultForWorkflow";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -36,13 +38,12 @@ public class Results extends AbstractEntityObject<Long, Results> implements Seri
     private double dragForce;
     private double liftForce;
     private double ratio;
-    
+
     @ManyToOne
     private Workflow workflow;
-    
-    
+
     public Results(){}
-    
+
     public Results(Workflow workflow, int iteration, double angle, double chord, double span, double dragForce, double liftForce, double ratio) {
         this.iteration = iteration;
         this.angle = angle;
@@ -53,7 +54,7 @@ public class Results extends AbstractEntityObject<Long, Results> implements Seri
         this.ratio = ratio;
         this.workflow = workflow;
     }
-    
+
     public Long getId() {
         return id;
     }

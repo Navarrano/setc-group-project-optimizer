@@ -7,20 +7,22 @@
 package cranfield.group.project.airfoil.server.services;
 
 
-import cranfield.group.project.airfoil.server.entities.Results;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
+
+import cranfield.group.project.airfoil.server.entities.Results;
 
 /**
  *
  * @author emi
  */
 public class ResultsCRUDService extends AbstractCRUDService<Long, Results>{
-    
-         EntityManagerFactory emf = EntityFactoryProvider.getInstance().createEntityManagerFactory();
-         
+
+	// EntityManagerFactory emf =
+	// EntityFactoryProvider.getInstance().createEntityManagerFactory();
+
          //add new result
         public void addResult(Results obj){
                 EntityManager em = emf.createEntityManager();
@@ -28,26 +30,24 @@ public class ResultsCRUDService extends AbstractCRUDService<Long, Results>{
                 em.persist(obj);
                 em.getTransaction().commit();
 	}
-        
+
         //add list of results
         public void addListOfResults(List<Results> listOfResults){
-            
+
         }
-        
-        
+
         //get list of results for particualr worflow
         public List<Results> getAllWorkflowResults(){
             List<Results> worflowResults = new ArrayList<Results>();
-            
+
             return worflowResults;
         }
-        
+
         //get result of last iteration for particular workflow
-        public Results getLastResult(){
-            Results lastIterResult = new Results();
-            
-            
-            return lastIterResult;
-            
+	public Results getLastResult(Long workflowId) {
+		Object obj = emf.createEntityManager()
+				.createNamedQuery(Results.FIND_LATEST_RESULT_FOR_WORKFLOW)
+				.setParameter("id", workflowId).getSingleResult();
+		return (Results) obj;
         }
 }

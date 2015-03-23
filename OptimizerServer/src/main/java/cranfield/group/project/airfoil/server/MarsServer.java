@@ -24,6 +24,7 @@ import cranfield.group.project.airfoil.server.entities.Results;
 import cranfield.group.project.airfoil.server.entities.Workflow;
 import cranfield.group.project.airfoil.server.models.ConnectedUsers;
 import cranfield.group.project.airfoil.server.services.LogsCRUDService;
+import cranfield.group.project.airfoil.server.services.ResultsCRUDService;
 import cranfield.group.project.airfoil.server.services.UserCRUDService;
 import cranfield.group.project.airfoil.server.services.WorkflowCRUDService;
 
@@ -39,15 +40,17 @@ public class MarsServer extends Thread implements Observer {
 
 	protected UserCRUDService astralUser;
 	protected LogsCRUDService logs;
-	protected WorkflowCRUDService workflow;
+	protected WorkflowCRUDService workflowService;
 	protected AstralUser astralus;
+	protected ResultsCRUDService resultsService;
 
 	public MarsServer(Socket client, ConnectedUsers users) {
 		this.client = client;
 		this.users = users;
 		logs = new LogsCRUDService();
 		astralUser = new UserCRUDService();
-		workflow = new WorkflowCRUDService();
+		workflowService = new WorkflowCRUDService();
+		resultsService = new ResultsCRUDService();
 	}
 
 	public void run() {
@@ -77,6 +80,12 @@ public class MarsServer extends Thread implements Observer {
 					ConnectionUtils.send(client,
 							getSelectedWorkflowData(workflowId));
 					break;
+				case ITERATE:
+					Long id = ConnectionUtils.receive(client, Long.class);
+					Integer iterations = ConnectionUtils.receive(client,
+							Integer.class);
+					runAdditionalIterations(id, iterations);
+					break;
 				case QUIT:
 					users.remove(astralus.getLogin());
 					isClientConnected = false;
@@ -93,7 +102,7 @@ public class MarsServer extends Thread implements Observer {
 	}
 
 	protected WorkflowDTO getSelectedWorkflowData(Long workflowId) {
-		Workflow w = workflow.getWorflowWithId(workflowId);
+		Workflow w = workflowService.getWorflowWithId(workflowId);
 		List<Results> tmpResults = w.getResults();
 
 		List<ResultsDTO> workflowResults = new LinkedList<>();
@@ -125,6 +134,21 @@ public class MarsServer extends Thread implements Observer {
 		return tmp;
 	}
 
+	private void runAdditionalIterations(Long workflowId, Integer iterations) {
+		Workflow workflow = workflowService.find(workflowId);
+		AirfoilCalculator calculator = new AirfoilCalculator(
+				workflow.getMinDragCoef(), workflow.getAeroplaneMass(),
+				workflow.getMaxLiftCoef(), workflow.getAirSpeed(),
+				workflow.getMinAirSpeed());
+		calculator.addObserver(this);
+		// Results result = workflow.getResults().get(
+		// workflow.getResults().size() - 1);
+		Results result = resultsService.getLastResult(workflowId);
+
+		calculator.optimize(result.getSpan(), result.getChord(), iterations,
+				result.getIteration(), workflow);
+	}
+
 	private void runOptimization(String workflowName,
 			Hashtable<String, Double> inputValues) {
 		String name = workflowName;
@@ -141,7 +165,7 @@ public class MarsServer extends Thread implements Observer {
 		Workflow workflowObj = new Workflow(astralus, name, nbIterations,
 				minDragCoef, aeroPlaneMass, maxLiftCoef, airSpeed, minAirSpeed,
 				0, chord, span);
-		workflow.addWorkflow(workflowObj);
+		workflowService.addWorkflow(workflowObj);
 
 		try {
 			ObjectOutputStream out = new ObjectOutputStream(

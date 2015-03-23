@@ -14,6 +14,7 @@ import java.io.ObjectInputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -39,6 +40,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import cranfield.group.project.airfoil.api.model.OperationType;
 import cranfield.group.project.airfoil.api.model.ResultsDTO;
 import cranfield.group.project.airfoil.api.model.WorkflowDTO;
 import cranfield.group.project.airfoil.client.MarsClient;
@@ -83,6 +85,8 @@ public class NewIteration extends JPanel implements ActionListener {
 	protected JList optimizationsList;
 	protected DefaultListModel<WorkflowDTO> optimizationsListModel;
 	protected String workflowName;
+	protected WorkflowDTO currentWorkflow;
+	protected ListSelectionListener listSelectionListener;
 
 	protected MarsClient client;
 
@@ -252,8 +256,8 @@ public class NewIteration extends JPanel implements ActionListener {
 		iterateButton.addActionListener(new AddNewIterListener());
 		createButton.setEnabled(false);
 		iterateButton.setEnabled(false);
-		optimizationsList
-				.addListSelectionListener(new SharedListSelectionHandler());
+		listSelectionListener = new SharedListSelectionHandler();
+		optimizationsList.addListSelectionListener(listSelectionListener);
 
 		client.addObserver(panelGraph);
 	}
@@ -400,12 +404,13 @@ public class NewIteration extends JPanel implements ActionListener {
 
 			counter++;
 
-			WorkflowDTO workflow = null;
+			currentWorkflow = null;
 			try {
 				ObjectInputStream in = new ObjectInputStream(client
 						.getClientSocket().getInputStream());
-				workflow = (WorkflowDTO) in.readObject();
-				optimizationsListModel.addElement(workflow);
+				currentWorkflow = (WorkflowDTO) in.readObject();
+				currentWorkflow.setResults(new LinkedList<ResultsDTO>());
+				optimizationsListModel.addElement(currentWorkflow);
 			} catch (IOException | ClassNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -414,7 +419,6 @@ public class NewIteration extends JPanel implements ActionListener {
 
 				@Override
 				public void run() {
-					// TODO Auto-generated method stub
 					boolean cont = true;
 					panelGraph.reset();
 					while (cont) {
@@ -422,21 +426,20 @@ public class NewIteration extends JPanel implements ActionListener {
 						if (results == null || results.getId() == -1) {
 							cont = false;
 						} else {
-							// System.out.println("In receivedOptimization: "
-							// + results.toString());
+							currentWorkflow.getResults().add(results);
 							panelGraph.addValueToDataset(results);
 						}
 					}
 					createButton.setEnabled(true);
+					iterateButton.setEnabled(true);
 				}
 			}).start();
 
-			// client.receiveOptimizationResult();
-			// TODO: Fix add new workflow in the list
-			// optimizationsListModel.addElement(workflow);
-			// panelGraph.displayOptimizationRatio(workflow.getResults());
-
-			// panelGraph.displayOptimizationRatio(optimizationResults);
+			optimizationsList
+					.removeListSelectionListener(listSelectionListener);
+			optimizationsList
+					.setSelectedIndex(optimizationsListModel.size() - 1);
+			optimizationsList.addListSelectionListener(listSelectionListener);
 		}
 	}
 
@@ -448,13 +451,43 @@ public class NewIteration extends JPanel implements ActionListener {
 			enableComponents(panelInput, true);
 			enableComponents(panelButton, true);
 			createButton.setEnabled(false);
+			iterateButton.setEnabled(false);
 		}
 	}
 
 	class AddNewIterListener implements ActionListener {
 
 		public void actionPerformed(ActionEvent event) {
+			createButton.setEnabled(false);
+			iterateButton.setEnabled(false);
+			try {
+				client.getClientSocket().send(
+						OperationType.ITERATE,
+						currentWorkflow.getId(),
+						Integer.parseInt(spinnerModelIterNumber.getValue()
+								.toString()));
+			} catch (ServerOfflineException e) {
+				((MainFrame) parent).closeAfterDisconnection();
+				return;
+			}
 
+			new Thread(new Runnable() {
+
+				@Override
+				public void run() {
+					boolean cont = true;
+					while (cont) {
+						ResultsDTO results = client.receiveResult();
+						if (results == null || results.getId() == -1) {
+							cont = false;
+						} else {
+							panelGraph.addValueToDataset(results);
+						}
+					}
+					createButton.setEnabled(true);
+					iterateButton.setEnabled(true);
+				}
+			}).start();
 		}
 	}
 
@@ -466,26 +499,15 @@ public class NewIteration extends JPanel implements ActionListener {
 			startButton.setEnabled(false);
 
 			int selectedOptimization = optimizationsList.getSelectedIndex();
-			Long workflowId = optimizationsListModel.get(selectedOptimization)
-					.getId();
+			currentWorkflow = optimizationsListModel.get(selectedOptimization);
+
 			System.out.println("Event for indexes "
 					+ optimizationsList.getSelectedIndex());
-			// String selectedWorkflow[] = {"loading workflow",
-			// Long.toString(workflowId)};
-			//
-			// try {
-			// ObjectOutputStream out = new ObjectOutputStream(
-			// client.getClientSocket().getOutputStream());
-			// out.writeObject(selectedWorkflow);
-			// } catch (IOException e1) {
-			// // TODO Auto-generated catch block
-			// e1.printStackTrace();
-			// }
 			WorkflowDTO dto = null;
 			try {
-				dto = client.receiveWorkflow(workflowId);
+				dto = client.receiveWorkflow(currentWorkflow.getId());
 			} catch (ServerOfflineException ex) {
-				((MainFrame) getParent()).closeAfterDisconnection();
+				((MainFrame) parent).closeAfterDisconnection();
 			}
 			if (dto != null) {
 				enableComponents(panelInitVar, false);
@@ -494,21 +516,6 @@ public class NewIteration extends JPanel implements ActionListener {
 				setInputValues(dto);
 				panelGraph.displayOptimizationRatio(dto.getResults());
 			}
-
-			// try {
-			// ObjectInputStream in = new
-			// ObjectInputStream(client.getClientSocket().getInputStream());
-			// WorkflowDTO workflowData = (WorkflowDTO) in.readObject();
-			// enableComponents(panelInitVar, false);
-			// enableComponents(panelInput, false);
-			// startButton.setEnabled(false);
-			// setInputValues(workflowData);
-			// panelGraph.displayOptimizationRatio(workflowData.getResults());
-			// } catch (IOException | ClassNotFoundException e2) {
-			// // TODO Auto-generated catch block
-			// e2.printStackTrace();
-			// }
-
 		}
 	}
 

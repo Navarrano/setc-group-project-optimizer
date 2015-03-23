@@ -37,21 +37,22 @@ public class AirfoilCalculator extends Observable {
 		this.resultService = new ResultsCRUDService();
 	}
 
-	public double[] optimize(double b, double c) {
+	public double[] optimize(double b, double c, double stepSize) {
 		double oldB = b;
 		double oldC = c;
-		b = b - STEP_SIZE * calcNumericalDerivativeByB(oldB, oldC, STEP_SIZE);
-		c = c - STEP_SIZE * calcNumericalDerivativeByC(oldB, oldC, STEP_SIZE);
+		b = b - stepSize * calcNumericalDerivativeByB(oldB, oldC, stepSize);
+		c = c - stepSize * calcNumericalDerivativeByC(oldB, oldC, stepSize);
 		return new double[] { b, c };
 	}
 
 	public void optimize(double b, double c, int iterations,
-			Workflow workflowObj) {
+			int iterationsOffset, Workflow workflow) {
 		double oldB;
 		double oldC;
+		double stepSize = STEP_SIZE;
 
 		// TODO: Logs
-		for (int i = 0; i < iterations; i++) {
+		for (int i = iterationsOffset; i < iterations + iterationsOffset; i++) {
 			oldB = b;
 			oldC = c;
 			double dragForce = calcTotalDrag(oldB, oldC);
@@ -60,13 +61,11 @@ public class AirfoilCalculator extends Observable {
 			System.out
 					.format("%d ==> Drag force: %.4f, Lift force: %.4f, RATIO: %.8f, b: %.3f c: %.3f\n",
 							i, dragForce, liftForce, ratio, b, c);
-			b = b - STEP_SIZE
-					* calcNumericalDerivativeByB(oldB, oldC, STEP_SIZE);
-			c = c - STEP_SIZE
-					* calcNumericalDerivativeByC(oldB, oldC, STEP_SIZE);
+			b = b - stepSize * calcNumericalDerivativeByB(oldB, oldC, stepSize);
+			c = c - stepSize * calcNumericalDerivativeByC(oldB, oldC, stepSize);
 
 			// Save current iteration results in the DB
-			Results result = new Results(workflowObj, i + 1, ANGLE, c, b,
+			Results result = new Results(workflow, i + 1, ANGLE, c, b,
 					dragForce, liftForce, ratio);
 			resultService.addResult(result);
 
@@ -75,10 +74,17 @@ public class AirfoilCalculator extends Observable {
 					ANGLE, c, b, dragForce, liftForce, ratio);
 			setChanged();
 			notifyObservers(resultToBeSent);
+
+			if (i % 500 == 0 && i != 0)
+				stepSize /= 2.0;
 		}
 		setChanged();
 		notifyObservers("End Optimization");
-		// TODO: Logs
+	}
+
+	public void optimize(double b, double c, int iterations,
+			Workflow workflowObj) {
+		optimize(b, c, iterations, 0, workflowObj);
 	}
 
 	private double calcNumericalDerivativeByB(double b, double c, double delta) {

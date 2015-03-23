@@ -3,7 +3,6 @@ package cranfield.group.project.airfoil.client;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.Socket;
 import java.util.Hashtable;
 import java.util.Observable;
 import java.util.Observer;
@@ -27,7 +26,7 @@ public class MarsClient extends Observable implements AutoCloseable, Observer {
 		setChanged();
 	}
 
-	public Socket getClientSocket() {
+	public ClientSocket getClientSocket() {
 		return clientSocket;
 	}
 
