@@ -1,7 +1,6 @@
 package cranfield.group.project.airfoil.server;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -13,8 +12,10 @@ import java.util.Observer;
 
 import com.jcraft.jsch.JSchException;
 
+import cranfield.group.project.airfoil.api.model.OperationType;
 import cranfield.group.project.airfoil.api.model.ResultsDTO;
 import cranfield.group.project.airfoil.api.model.WorkflowDTO;
+import cranfield.group.project.airfoil.client.util.ConnectionUtils;
 import cranfield.group.project.airfoil.server.controllers.AirfoilCalculator;
 import cranfield.group.project.airfoil.server.controllers.AstralConnection;
 import cranfield.group.project.airfoil.server.entities.AstralUser;
@@ -30,11 +31,10 @@ import cranfield.group.project.airfoil.server.services.WorkflowCRUDService;
  * The Class MarsServer. Represents the entry point of the server, that handles
  * the communication with the clients.
  */
-public class MarsServer extends Thread implements Observer{
+public class MarsServer extends Thread implements Observer {
 
 	/** The server socket */
 	protected Socket client;
-	protected String username;
 	protected ConnectedUsers users;
 
 	protected UserCRUDService astralUser;
@@ -48,7 +48,6 @@ public class MarsServer extends Thread implements Observer{
 		logs = new LogsCRUDService();
 		astralUser = new UserCRUDService();
 		workflow = new WorkflowCRUDService();
-
 	}
 
 	public void run() {
@@ -56,37 +55,30 @@ public class MarsServer extends Thread implements Observer{
 			boolean isClientConnected = true;
 
 			while (isClientConnected) {
+				OperationType operation = ConnectionUtils
+						.receiveOperation(client);
 
-				ObjectInputStream in = new ObjectInputStream(
-						client.getInputStream());
-
-				String[] dataFromClient = (String[]) in.readObject();
-
-				switch (dataFromClient[0]) {
-				case "credentials":
-					boolean isConnected = validateConnection(client,
-							dataFromClient);
+				switch (operation) {
+				case CREDENTIALS:
+					boolean isConnected = validateConnection(ConnectionUtils
+							.receive(client, new String[] {}));
 					if (isConnected) {
-						ObjectOutputStream out = new ObjectOutputStream(
-								client.getOutputStream());
-						out.writeObject(getWorkflowList());
+						ConnectionUtils.send(client, getWorkflowList());
 					}
 					break;
-				case "optimization":
-					Hashtable<String, Double> inputValues = (Hashtable<String, Double>) in
-							.readObject();
-					runOptimization(client, dataFromClient[1], inputValues);
-					System.out.println(inputValues.toString());
-					System.out.println(inputValues.get("Span: "));
+				case OPTIMIZATION:
+					runOptimization(ConnectionUtils.receive(client,
+							String.class), ConnectionUtils.receive(client,
+							new Hashtable<String, Double>()));
 					break;
-				case "loading workflow":
-					Long workflowId = Long.parseLong(dataFromClient[1]);
-					ObjectOutputStream out = new ObjectOutputStream(
-							client.getOutputStream());
-					out.writeObject(getSelectedWorkflowData(workflowId));
+				case LOAD_WORKFLOW:
+					Long workflowId = ConnectionUtils.receive(client,
+							Long.class);
+					ConnectionUtils.send(client,
+							getSelectedWorkflowData(workflowId));
 					break;
-				case "quit":
-					users.remove(username);
+				case QUIT:
+					users.remove(astralus.getLogin());
 					isClientConnected = false;
 					client.close();
 					break;
@@ -95,11 +87,7 @@ public class MarsServer extends Thread implements Observer{
 
 		} catch (SocketTimeoutException s) {
 			System.out.println("SERVER : Socket timed out!");
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -137,7 +125,7 @@ public class MarsServer extends Thread implements Observer{
 		return tmp;
 	}
 
-	private void runOptimization(Socket server, String workflowName,
+	private void runOptimization(String workflowName,
 			Hashtable<String, Double> inputValues) {
 		String name = workflowName;
 		double minDragCoef = inputValues.get("Minimal drag coefficient: ");
@@ -149,11 +137,10 @@ public class MarsServer extends Thread implements Observer{
 		double span = inputValues.get("Span: ");
 		double chord = inputValues.get("Chord: ");
 		int nbIterations = inputValues.get("Iteration Number").intValue();
-		double leadingEdge = inputValues.get("Leading edge: ");
 
 		Workflow workflowObj = new Workflow(astralus, name, nbIterations,
 				minDragCoef, aeroPlaneMass, maxLiftCoef, airSpeed, minAirSpeed,
-				leadingEdge, chord, span);
+				0, chord, span);
 		workflow.addWorkflow(workflowObj);
 
 		try {
@@ -168,8 +155,7 @@ public class MarsServer extends Thread implements Observer{
 				aeroPlaneMass, maxLiftCoef, airSpeed, minAirSpeed);
 		calculator.addObserver(this);
 
-		calculator
-				.optimize(span, chord, leadingEdge, nbIterations, workflowObj);
+		calculator.optimize(span, chord, nbIterations, workflowObj);
 	}
 
 	private WorkflowDTO prepareWorkflowDTO(Workflow w, List<ResultsDTO> results) {
@@ -184,29 +170,29 @@ public class MarsServer extends Thread implements Observer{
 	 * is sent. In addition, the appropriate event logs are added to the
 	 * database.
 	 *
-	 * @param server
+	 * @param client
 	 *            the server
 	 * @param credentials
 	 *            the credentials
 	 */
-	protected boolean validateConnection(Socket server, String[] credentials) {
+	protected boolean validateConnection(String[] credentials) {
 		ObjectOutputStream out;
 
 		try {
-			out = new ObjectOutputStream(server.getOutputStream());
+			out = new ObjectOutputStream(client.getOutputStream());
 
 			String msg = checkCredentials(credentials);
 			if (msg == null) {
 				out.writeObject(msg);
-				writeUserInformationInDatabase(credentials[1]);
+				writeUserInformationInDatabase(credentials[0]);
 				logs.addEventLog(new Logs("Connection granted : username "
-						+ credentials[1], "info", "connection"));
+						+ credentials[0], "info", "connection"));
 				System.out.println("Good credentials");
 				return true;
 			} else {
 				out.writeObject(msg);
 				logs.addEventLog(new Logs("Connection denied : username "
-						+ credentials[1], "error", "connection"));
+						+ credentials[0], "error", "connection"));
 				System.out.println("Wrong credentials");
 			}
 		} catch (IOException e) {
@@ -247,13 +233,12 @@ public class MarsServer extends Thread implements Observer{
 	 * @return msg with error or null if successful
 	 */
 	protected String checkCredentials(String[] credentials) {
-		if (users.contains(credentials[1]))
-			return "User \"" + credentials[1]
+		if (users.contains(credentials[0]))
+			return "User \"" + credentials[0]
 					+ "\" is already connected with server";
 		try (AstralConnection astralConnection = new AstralConnection(
-				credentials[1], credentials[2])) {
-			username = credentials[1];
-			users.add(credentials[1]);
+				credentials[0], credentials[1])) {
+			users.add(credentials[0]);
 		} catch (JSchException e) {
 			return e.getMessage();
 		}
@@ -263,16 +248,15 @@ public class MarsServer extends Thread implements Observer{
 	@Override
 	public void update(Observable o, Object arg) {
 		ObjectOutputStream out;
-    	try {
-			out = new ObjectOutputStream(
-					client.getOutputStream());
+		try {
+			out = new ObjectOutputStream(client.getOutputStream());
 			if (arg.getClass() == ResultsDTO.class) {
-	        	ResultsDTO resultsToBeSent = (ResultsDTO) arg;
+				ResultsDTO resultsToBeSent = (ResultsDTO) arg;
 				out.writeObject(resultsToBeSent);
 
-	        } else if (((String) arg).equalsIgnoreCase("End Optimization")){
+			} else if (((String) arg).equalsIgnoreCase("End Optimization")) {
 				out.writeObject(new ResultsDTO((long) -1));
-	        }
+			}
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

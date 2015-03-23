@@ -26,8 +26,6 @@ import cranfield.group.project.airfoil.server.services.EntityFactoryProvider;
 public class MainFrame extends JFrame implements Observer {
 
 	private ServerSocketThread serverThread;
-	// private Set<String> connectedUsers = new HashSet<>();
-
 	private ConnectedUsers users;
 
 	public MainFrame() {
@@ -126,8 +124,6 @@ public class MainFrame extends JFrame implements Observer {
 		public void run() {
 			try {
 				socket = new ServerSocket(PORT);
-				// System.out.println("SERVER : Waiting for client on port "
-				// + socket.getLocalPort() + "...");
 				outputArea.append("Waiting for client on port "
 						+ socket.getLocalPort() + "...\n");
 
@@ -135,8 +131,6 @@ public class MainFrame extends JFrame implements Observer {
 					Socket client = socket.accept();
 					if (client.getInputStream().read() == 0)
 						continue;
-					// System.out.println("SERVER : Just connected to "
-					// + client.getRemoteSocketAddress());
 					outputArea.append("Just connected to "
 							+ client.getRemoteSocketAddress() + "\n");
 					new Thread(new MarsServer(client, users)).start();

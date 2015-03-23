@@ -10,8 +10,6 @@ import cranfield.group.project.airfoil.server.gui.MainFrame;
  */
 public class ServerApp {
 
-	private static final int PORT = 6066;
-
 	public static void main(String[] args) {
 
 		EventQueue.invokeLater(new Runnable() {
@@ -23,4 +21,5 @@ public class ServerApp {
 			}
 		});
 	}
+
 }

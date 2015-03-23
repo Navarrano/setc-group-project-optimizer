@@ -9,14 +9,18 @@ import java.util.Observable;
 import java.util.Observer;
 
 import cranfield.group.project.airfoil.api.model.AstralUserDTO;
+import cranfield.group.project.airfoil.api.model.OperationType;
 import cranfield.group.project.airfoil.api.model.ResultsDTO;
+import cranfield.group.project.airfoil.api.model.WorkflowDTO;
+import cranfield.group.project.airfoil.client.model.ClientSocket;
+import cranfield.group.project.airfoil.client.model.ServerOfflineException;
 
 public class MarsClient extends Observable implements AutoCloseable, Observer {
-	private Socket clientSocket;
 	private AstralUserDTO user;
+	private ClientSocket clientSocket;
 
 	public MarsClient(String serverName, Integer port) throws IOException {
-		clientSocket = new Socket(serverName, port);
+		clientSocket = new ClientSocket(serverName, port);
 		clientSocket.getOutputStream().write(1);
 		System.out.println("CLIENT : Just connected to "
 				+ clientSocket.getRemoteSocketAddress());
@@ -31,29 +35,13 @@ public class MarsClient extends Observable implements AutoCloseable, Observer {
 		return clientSocket.isConnected();
 	}
 
-	public String areValidatedCredentials(String username, String password) {
+	public String areValidatedCredentials(String username, String password)
+			throws ServerOfflineException {
 		String msg = null;
-		String credentials[] = { "credentials", username, password };
-		try {
-			ObjectOutputStream out = new ObjectOutputStream(
-					clientSocket.getOutputStream());
-			out.writeObject(credentials);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 
-		ObjectInputStream in;
-		try {
-			in = new ObjectInputStream(clientSocket.getInputStream());
-			msg = (String) in.readObject();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		clientSocket.sendArray(OperationType.CREDENTIALS,
+				new String[] { username, password });
+		msg = clientSocket.receive(String.class);
 
 		return msg;
 	}
@@ -64,34 +52,24 @@ public class MarsClient extends Observable implements AutoCloseable, Observer {
 	}
 
 	public void terminateConnection() {
-		String quitString[] = { "quit" };
+		// clientSocket.send(OperationType.QUIT);
 		try {
 			ObjectOutputStream out = new ObjectOutputStream(
 					clientSocket.getOutputStream());
-			out.writeObject(quitString);
-			clientSocket.close();
+			out.writeObject(OperationType.QUIT);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
 	public void sendOptimizationInputs(String workflowName,
-			Hashtable<String, Double> inputs) {
-		String messageForServerAction[] = { "optimization", workflowName };
-		try {
-			setChanged();
-			notifyObservers("Sending Optimization inputs to the server: ");
-			setChanged();
-			notifyObservers(inputs);
-			ObjectOutputStream out = new ObjectOutputStream(
-					clientSocket.getOutputStream());
-			out.writeObject(messageForServerAction);
-			out.writeObject(inputs);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			Hashtable<String, Double> inputs) throws ServerOfflineException {
+		setChanged();
+		notifyObservers("Sending Optimization inputs to the server: ");
+		setChanged();
+		notifyObservers(inputs);
+		clientSocket.send(OperationType.OPTIMIZATION,
+				workflowName, inputs);
 	}
 
 	public ResultsDTO receiveResult() {
@@ -104,6 +82,11 @@ public class MarsClient extends Observable implements AutoCloseable, Observer {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public WorkflowDTO receiveWorkflow(long id) throws ServerOfflineException {
+		clientSocket.send(OperationType.LOAD_WORKFLOW, id);
+		return clientSocket.receive(WorkflowDTO.class);
 	}
 
 	public void receiveOptimizationResult() {

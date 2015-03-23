@@ -6,9 +6,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -19,7 +16,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import cranfield.group.project.airfoil.api.model.WorkflowDTO;
 import cranfield.group.project.airfoil.client.MarsClient;
 import cranfield.group.project.airfoil.client.util.ConnectionUtils;
 
@@ -37,21 +33,21 @@ public class MainFrame extends JFrame {
     protected final int port;
 
     protected final Timer checkServerResponseTimer;
-    protected static final int TIMER_PERIOD = 10 * 1000;
+	protected static final int TIMER_PERIOD = 60 * 1000;
 
     public MainFrame(final MarsClient client, final String host, final int port) {
-        super("Randomly Selcted");
+		super("Randomly Selected");
         this.client = client;
         this.host = host;
         this.port = port;
         contentPane.setLayout(new CardLayout());
 
-        NewIteration newIter = new NewIteration(client);
-        contentPane.add(newIter.panelComponent);
+		NewIteration newIter = new NewIteration(this, client);
+		contentPane.add(newIter.panelComponent, CardType.ITERATION.name());
         showlogs = new ShowLogs();
-        contentPane.add(showlogs.panelComponent, "2");
+		contentPane.add(showlogs.panelComponent, CardType.LOGS.name());
         DesciptionFrame newDesc = new DesciptionFrame();
-        contentPane.add(newDesc.panelComponent);
+		contentPane.add(newDesc.panelComponent, CardType.DESCRIPTION.name());
         createMenuBar();
         add(contentPane);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -67,25 +63,28 @@ public class MainFrame extends JFrame {
             @Override
             public void run() {
                 if (!ConnectionUtils.checkHostAvailability(host, port)) {
-                    client.terminateConnection();
-                    checkServerResponseTimer.cancel();
-                    int res = JOptionPane
-                            .showConfirmDialog(
-                                    null,
-                                    "Connection with serves has been lost.\nClick OK if you want to return to login frame.",
-                                    "Connection lost",
-                                    JOptionPane.OK_CANCEL_OPTION,
-                                    JOptionPane.ERROR_MESSAGE);
-                    if (res == JOptionPane.OK_OPTION) {
-                        AuthenticationFrame frame = new AuthenticationFrame(
-                                host, port);
-                        frame.setVisible(true);
-                    }
-                    dispose();
+					closeAfterDisconnection();
                 }
             }
         }, 0L, TIMER_PERIOD);
     }
+
+	public void closeAfterDisconnection() {
+		client.terminateConnection();
+
+		checkServerResponseTimer.cancel();
+		int res = JOptionPane
+				.showConfirmDialog(
+						null,
+						"Connection with serves has been lost.\nClick OK if you want to return to login frame.",
+						"Connection lost", JOptionPane.OK_CANCEL_OPTION,
+						JOptionPane.ERROR_MESSAGE);
+		if (res == JOptionPane.OK_OPTION) {
+			AuthenticationFrame frame = new AuthenticationFrame(host, port);
+			frame.setVisible(true);
+		}
+		dispose();
+	}
 
     public ShowLogs getShowLogs() {
         return showlogs;
@@ -117,9 +116,10 @@ public class MainFrame extends JFrame {
 
         menubar.add(Box.createHorizontalGlue());
 
-        iterMenu.addActionListener(new IterActionListener());
-        logsMenu.addActionListener(new LogsActionListener());
-        descripMenu.addActionListener(new DescripActionListener());
+		iterMenu.addActionListener(new ChangeCardListener(CardType.ITERATION));
+		logsMenu.addActionListener(new ChangeCardListener(CardType.LOGS));
+		descripMenu.addActionListener(new ChangeCardListener(
+				CardType.DESCRIPTION));
         add(menubar, BorderLayout.PAGE_END);
         setJMenuBar(menubar);
     }
@@ -129,38 +129,56 @@ public class MainFrame extends JFrame {
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 // Terminate the socket connection with the server
-                client.terminateConnection();
+				client.terminateConnection();
+
                 checkServerResponseTimer.cancel();
             }
         });
     }
 
-    class IterActionListener implements ActionListener {
+	private enum CardType {
+		ITERATION, LOGS, DESCRIPTION;
+	}
 
-        public void actionPerformed(ActionEvent e) {
-            System.out.println("Selected: " + e.getActionCommand());
-            CardLayout cardLayout = (CardLayout) contentPane.getLayout();
-            cardLayout.first(contentPane);
+	private class ChangeCardListener implements ActionListener {
 
-        }
-    }
+		private final CardType cardType;
 
-    class LogsActionListener implements ActionListener {
+		public ChangeCardListener(CardType cardType) {
+			this.cardType = cardType;
+		}
 
-        public void actionPerformed(ActionEvent e) {
-            System.out.println("Selected: " + e.getActionCommand());
-            CardLayout cardLayout = (CardLayout) contentPane.getLayout();
-            cardLayout.show(contentPane, "2");
-        }
-    }
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			CardLayout cardLayout = (CardLayout) contentPane.getLayout();
+			cardLayout.show(contentPane, cardType.name());
+		}
 
-    class DescripActionListener implements ActionListener {
+	}
 
-        public void actionPerformed(ActionEvent e) {
-            System.out.println("Selected: " + e.getActionCommand());
-            CardLayout cardLayout = (CardLayout) contentPane.getLayout();
-            cardLayout.last(contentPane);
-
-        }
-    }
+	// class IterActionListener implements ActionListener {
+	//
+	// public void actionPerformed(ActionEvent e) {
+	// CardLayout cardLayout = (CardLayout) contentPane.getLayout();
+	// cardLayout.first(contentPane);
+	//
+	// }
+	// }
+	//
+	// class LogsActionListener implements ActionListener {
+	//
+	// public void actionPerformed(ActionEvent e) {
+	// CardLayout cardLayout = (CardLayout) contentPane.getLayout();
+	// cardLayout.show(contentPane, "2");
+	// }
+	// }
+	//
+	// class DescripActionListener implements ActionListener {
+	//
+	// public void actionPerformed(ActionEvent e) {
+	// CardLayout cardLayout = (CardLayout) contentPane.getLayout();
+	// cardLayout.last(contentPane);
+	//
+	// }
+	// }
 }

@@ -13,8 +13,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -28,8 +26,8 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import cranfield.group.project.airfoil.api.model.WorkflowDTO;
 import cranfield.group.project.airfoil.client.MarsClient;
+import cranfield.group.project.airfoil.client.model.ServerOfflineException;
 import cranfield.group.project.airfoil.client.util.ConnectionUtils;
 
 @SuppressWarnings("serial")
@@ -70,8 +68,9 @@ public class AuthenticationFrame extends JFrame {
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				// Terminate the socket connection with the server
-				if (client != null && client.isConnected())
+				if (client != null && client.isConnected()) {
 					client.terminateConnection();
+				}
 				if (timer != null)
 					timer.cancel();
 			}
@@ -103,8 +102,6 @@ public class AuthenticationFrame extends JFrame {
 
 				@Override
 				public void run() {
-					System.out.println("Searching for server at " + host + ":"
-							+ port);
 					initConnection();
 				}
 			}, TIMER_PERIOD, TIMER_PERIOD);
@@ -209,7 +206,7 @@ public class AuthenticationFrame extends JFrame {
 
 			if (ConnectionUtils.checkHostAvailability(host, port)) {
 				try {
-					client = new MarsClient(host, port);					
+					client = new MarsClient(host, port);
 					String msg = client.areValidatedCredentials(puname, ppaswd);
 					if (msg == null) {
 						MainFrame mainFrame = new MainFrame(client, host, port);
@@ -223,7 +220,7 @@ public class AuthenticationFrame extends JFrame {
 						pass.setText("");
 						txuser.requestFocus();
 					}
-				} catch (IOException ex) {
+				} catch (IOException | ServerOfflineException ex) {
 					ex.printStackTrace();
 				}
 			} else {
