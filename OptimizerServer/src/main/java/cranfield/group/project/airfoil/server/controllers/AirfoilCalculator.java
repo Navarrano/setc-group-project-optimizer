@@ -63,6 +63,11 @@ public class AirfoilCalculator extends Observable {
 							i, dragForce, liftForce, ratio, b, c);
 			b = b - stepSize * calcNumericalDerivativeByB(oldB, oldC, stepSize);
 			c = c - stepSize * calcNumericalDerivativeByC(oldB, oldC, stepSize);
+			if (ratio == Double.NaN || b == Double.NaN || c == Double.NaN) {
+				setChanged();
+				notifyObservers("NaN error");
+				break;
+			}
 
 			// Save current iteration results in the DB
 			Results result = new Results(workflow, i + 1, ANGLE, c, b,

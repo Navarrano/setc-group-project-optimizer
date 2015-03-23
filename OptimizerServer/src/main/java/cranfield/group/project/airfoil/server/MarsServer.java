@@ -274,12 +274,14 @@ public class MarsServer extends Thread implements Observer {
 		ObjectOutputStream out;
 		try {
 			out = new ObjectOutputStream(client.getOutputStream());
+			long id = -1L;
 			if (arg.getClass() == ResultsDTO.class) {
 				ResultsDTO resultsToBeSent = (ResultsDTO) arg;
 				out.writeObject(resultsToBeSent);
-
+			} else if (((String) arg).equalsIgnoreCase("NaN error")) {
+				id = -2L;
 			} else if (((String) arg).equalsIgnoreCase("End Optimization")) {
-				out.writeObject(new ResultsDTO((long) -1));
+				out.writeObject(new ResultsDTO(id));
 			}
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block

@@ -425,6 +425,13 @@ public class NewIteration extends JPanel implements ActionListener {
 						ResultsDTO results = client.receiveResult();
 						if (results == null || results.getId() == -1) {
 							cont = false;
+						} else if (results.getId() == -2) {
+							cont = false;
+							JOptionPane
+									.showMessageDialog(
+											parent,
+											"Calculations has been stopped. NaN value reached",
+											"NaN", JOptionPane.ERROR_MESSAGE);
 						} else {
 							currentWorkflow.getResults().add(results);
 							panelGraph.addValueToDataset(results);
