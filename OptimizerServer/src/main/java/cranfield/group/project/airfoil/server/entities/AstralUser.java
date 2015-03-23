@@ -3,6 +3,7 @@ package cranfield.group.project.airfoil.server.entities;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -29,18 +30,21 @@ public class AstralUser extends AbstractEntityObject<Long, AstralUser> implement
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String login;
-    private Timestamp last_connection_date;
-    private int nb_connections;
+    private Timestamp lastConnectionDate;
+    private int nbConnections;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "creator", fetch = FetchType.EAGER)
     private List<Workflow> workflows;
+    
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner", fetch = FetchType.EAGER)
+    private List<Logs> logs;
     
     public AstralUser(){}
     
     public AstralUser(String login) {
         this.login = login;
-        this.last_connection_date = new Timestamp(new java.util.Date().getTime());
-        this.nb_connections = 1;
+        this.lastConnectionDate = new Timestamp(new java.util.Date().getTime());
+        this.nbConnections = 1;
     }
 
     public Long getId() {
@@ -60,19 +64,19 @@ public class AstralUser extends AbstractEntityObject<Long, AstralUser> implement
     }
     
     public Timestamp getLast_connection_date() {
-        return last_connection_date;
+        return lastConnectionDate;
     }
 
     public void setLast_connection_date(Timestamp last_connection_date) {
-        this.last_connection_date = last_connection_date;
+        this.lastConnectionDate = last_connection_date;
     }
     
     public int getNb_connections() {
-        return nb_connections;
+        return nbConnections;
     }
 
     public void setNb_connections(int nb_connections) {
-        this.nb_connections = nb_connections;
+        this.nbConnections = nb_connections;
     }
 
     public List<Workflow> getWorkflows() {

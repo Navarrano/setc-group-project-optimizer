@@ -48,11 +48,10 @@ public class Workflow extends AbstractEntityObject<Long, Workflow> implements Se
     private double span;
     private String name;
     
-    @OneToMany(cascade = CascadeType.PERSIST)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "workflow", fetch = FetchType.LAZY)
     private List<Results> results;
     
     @ManyToOne
-    @JoinColumn(name="CreatorId")
     private AstralUser creator;
 
     public Workflow(){}

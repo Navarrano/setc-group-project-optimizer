@@ -38,7 +38,6 @@ public class Results extends AbstractEntityObject<Long, Results> implements Seri
     private double ratio;
     
     @ManyToOne
-    @JoinColumn(name="workflowId")
     private Workflow workflow;
     
     

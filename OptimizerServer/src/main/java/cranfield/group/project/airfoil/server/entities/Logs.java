@@ -11,6 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**
@@ -28,12 +29,16 @@ public class Logs extends AbstractEntityObject<Long, Logs> implements Serializab
     private String logType;
     private String logSubject;
     
+    @ManyToOne
+    private AstralUser owner;
+    
     public Logs(){}
     
-    public Logs(String logSubject, String logType, String message){
+    public Logs(AstralUser owner, String logSubject, String logType, String message){
         this.logSubject = logSubject;
         this.logType = logType;
         this.message = message;
+        this.owner = owner;
     }
     
     

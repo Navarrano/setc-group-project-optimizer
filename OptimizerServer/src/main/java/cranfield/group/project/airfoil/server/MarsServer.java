@@ -185,13 +185,13 @@ public class MarsServer extends Thread implements Observer {
 			if (msg == null) {
 				out.writeObject(msg);
 				writeUserInformationInDatabase(credentials[0]);
-				logs.addEventLog(new Logs("Connection granted : username "
+				logs.addEventLog(new Logs(astralus, "Connection granted : username "
 						+ credentials[0], "info", "connection"));
 				System.out.println("Good credentials");
 				return true;
 			} else {
 				out.writeObject(msg);
-				logs.addEventLog(new Logs("Connection denied : username "
+				logs.addEventLog(new Logs(astralus, "Connection denied : username "
 						+ credentials[0], "error", "connection"));
 				System.out.println("Wrong credentials");
 			}
@@ -218,7 +218,7 @@ public class MarsServer extends Thread implements Observer {
 		} else {
 			astralus = new AstralUser(username);
 			astralUser.addNewUser(astralus);
-			logs.addEventLog(new Logs("User " + username
+			logs.addEventLog(new Logs(astralus, "User " + username
 					+ " added to AstralUsers table.", "info", "database"));
 		}
 	}
