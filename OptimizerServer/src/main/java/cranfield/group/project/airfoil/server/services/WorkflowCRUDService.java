@@ -57,4 +57,16 @@ public class WorkflowCRUDService extends AbstractCRUDService<Long, Workflow>{
             return chosenWorkflow;
 
 	}
+        
+        public void removeWorkflow(Long workflowId){
+            EntityManager em = emf.createEntityManager();
+            Workflow workflow = getWorflowWithId(workflowId);
+            em.getTransaction().begin();
+            List<Results> listOfResults = workflow.getResults();
+            for(Results result : listOfResults){
+                em.remove(result);
+            }
+            em.remove(workflow);
+            em.getTransaction().commit();
+        }
 }

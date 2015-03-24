@@ -31,18 +31,6 @@ public class ResultsCRUDService extends AbstractCRUDService<Long, Results>{
                 em.getTransaction().commit();
 	}
 
-        //add list of results
-        public void addListOfResults(List<Results> listOfResults){
-
-        }
-
-        //get list of results for particualr worflow
-        public List<Results> getAllWorkflowResults(){
-            List<Results> worflowResults = new ArrayList<Results>();
-
-            return worflowResults;
-        }
-
         //get result of last iteration for particular workflow
 	public Results getLastResult(Long workflowId) {
 		Object obj = emf.createEntityManager()
