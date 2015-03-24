@@ -45,7 +45,6 @@ import cranfield.group.project.airfoil.api.model.ResultsDTO;
 import cranfield.group.project.airfoil.api.model.WorkflowDTO;
 import cranfield.group.project.airfoil.client.MarsClient;
 import cranfield.group.project.airfoil.client.model.ServerOfflineException;
-import java.awt.BorderLayout;
 
 /**
  *
@@ -57,7 +56,7 @@ public class NewIteration extends JPanel implements ActionListener {
 	protected JButton createButton;
 	protected JButton iterateButton;
 	protected JButton startButton;
-        protected JButton clearWorkflow;
+	protected JButton clearWorkflow;
 	protected JPanel panelComponent = new JPanel();
 	protected JPanel panelInput = new JPanel();
 	protected JPanel panelPicture = new JPanel();
@@ -65,7 +64,7 @@ public class NewIteration extends JPanel implements ActionListener {
 	protected JPanel panelButton = new JPanel();
 	protected JPanel panelComboBox = new JPanel();
 	protected JPanel panelList = new JPanel();
-        protected JPanel panelButtonWorkflow = new JPanel();
+	protected JPanel panelButtonWorkflow = new JPanel();
 
 	protected GraphPanel panelGraph = new GraphPanel();
 	protected JComboBox comboDragCoeff = new JComboBox();
@@ -89,6 +88,7 @@ public class NewIteration extends JPanel implements ActionListener {
 	protected DefaultListModel<WorkflowDTO> optimizationsListModel;
 	protected String workflowName;
 	protected WorkflowDTO currentWorkflow;
+	protected int currentIndex = 0;
 	protected ListSelectionListener listSelectionListener;
 
 	protected MarsClient client;
@@ -171,11 +171,12 @@ public class NewIteration extends JPanel implements ActionListener {
 		startButton = new JButton("start optimization");
 		iterateButton = new JButton("iterate");
 		createButton = new JButton("create new optimization");
-                clearWorkflow = new JButton("clear Workflow");
-                
-                
-                panelButtonWorkflow.setLayout(new BoxLayout(panelButtonWorkflow, BoxLayout.LINE_AXIS));
-                panelButtonWorkflow.add(clearWorkflow);
+		clearWorkflow = new JButton("Remove workflow");
+		clearWorkflow.setEnabled(false);
+
+		panelButtonWorkflow.setLayout(new BoxLayout(panelButtonWorkflow,
+				BoxLayout.LINE_AXIS));
+		panelButtonWorkflow.add(clearWorkflow);
 
 		optimizationsListModel = new DefaultListModel();
 		initWorkflows();
@@ -226,7 +227,7 @@ public class NewIteration extends JPanel implements ActionListener {
 		loweredbevelList = BorderFactory.createLoweredBevelBorder();
 		panelList.setLayout(new BoxLayout(panelList, BoxLayout.Y_AXIS));
 		panelList.add(paneList);
-                panelList.add(panelButtonWorkflow);
+		panelList.add(panelButtonWorkflow);
 		panelList.setBorder(loweredbevelList);
 		panelList.setPreferredSize(new Dimension(210, 100));
 		TitledBorder titleList;
@@ -263,8 +264,8 @@ public class NewIteration extends JPanel implements ActionListener {
 		startButton.addActionListener(new GetValueListener());
 		createButton.addActionListener(new CreateNewOptimListener());
 		iterateButton.addActionListener(new AddNewIterListener());
-                clearWorkflow.addActionListener(new ClearWorkflowListener());
-                
+		clearWorkflow.addActionListener(new ClearWorkflowListener());
+
 		createButton.setEnabled(false);
 		iterateButton.setEnabled(false);
 		listSelectionListener = new SharedListSelectionHandler();
@@ -455,9 +456,10 @@ public class NewIteration extends JPanel implements ActionListener {
 
 			optimizationsList
 					.removeListSelectionListener(listSelectionListener);
-			optimizationsList
-					.setSelectedIndex(optimizationsListModel.size() - 1);
+			currentIndex = optimizationsListModel.size() - 1;
+			optimizationsList.setSelectedIndex(currentIndex);
 			optimizationsList.addListSelectionListener(listSelectionListener);
+			clearWorkflow.setEnabled(true);
 		}
 	}
 
@@ -472,11 +474,20 @@ public class NewIteration extends JPanel implements ActionListener {
 			iterateButton.setEnabled(false);
 		}
 	}
-        
-        class ClearWorkflowListener implements ActionListener {
+
+	class ClearWorkflowListener implements ActionListener {
 
 		public void actionPerformed(ActionEvent event) {
-			optimizationsListModel.clear();
+			if (currentWorkflow != null) {
+				try {
+					client.removeWorkflow(currentWorkflow.getId());
+					optimizationsListModel.remove(currentIndex);
+					createButton.doClick();
+				} catch (ServerOfflineException e) {
+					((MainFrame) parent).closeAfterDisconnection();
+					return;
+				}
+			}
 		}
 	}
 
@@ -522,8 +533,12 @@ public class NewIteration extends JPanel implements ActionListener {
 			createButton.setEnabled(true);
 			iterateButton.setEnabled(true);
 			startButton.setEnabled(false);
+			clearWorkflow.setEnabled(true);
 
 			int selectedOptimization = optimizationsList.getSelectedIndex();
+			if (selectedOptimization == -1)
+				return;
+			currentIndex = selectedOptimization;
 			currentWorkflow = optimizationsListModel.get(selectedOptimization);
 
 			System.out.println("Event for indexes "

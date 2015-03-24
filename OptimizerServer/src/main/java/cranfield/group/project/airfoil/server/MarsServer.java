@@ -80,6 +80,10 @@ public class MarsServer extends Thread implements Observer {
 					ConnectionUtils.send(client,
 							getSelectedWorkflowData(workflowId));
 					break;
+				case REMOVE_WORKFLOW:
+					Long workId = ConnectionUtils.receive(client, Long.class);
+					workflowService.removeWorkflow(workId);
+					break;
 				case ITERATE:
 					Long id = ConnectionUtils.receive(client, Long.class);
 					Integer iterations = ConnectionUtils.receive(client,

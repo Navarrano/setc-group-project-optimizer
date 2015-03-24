@@ -83,6 +83,10 @@ public class MarsClient extends Observable implements AutoCloseable, Observer {
 		return null;
 	}
 
+	public void removeWorkflow(long id) throws ServerOfflineException {
+		clientSocket.send(OperationType.REMOVE_WORKFLOW, id);
+	}
+
 	public WorkflowDTO receiveWorkflow(long id) throws ServerOfflineException {
 		clientSocket.send(OperationType.LOAD_WORKFLOW, id);
 		return clientSocket.receive(WorkflowDTO.class);
