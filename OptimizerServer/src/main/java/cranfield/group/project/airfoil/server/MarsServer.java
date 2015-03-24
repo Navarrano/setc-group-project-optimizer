@@ -82,6 +82,10 @@ public class MarsServer extends Thread implements Observer {
 					break;
 				case REMOVE_WORKFLOW:
 					Long workId = ConnectionUtils.receive(client, Long.class);
+					Workflow workflow = workflowService.find(workId);
+					logs.addEventLog(new Logs(astralus, "Workflow "
+							+ workflow.getName() + " was deteletd", "info",
+							"optimization"));
 					workflowService.removeWorkflow(workId);
 					break;
 				case ITERATE:
@@ -170,6 +174,8 @@ public class MarsServer extends Thread implements Observer {
 				minDragCoef, aeroPlaneMass, maxLiftCoef, airSpeed, minAirSpeed,
 				0, chord, span);
 		workflowService.addWorkflow(workflowObj);
+		logs.addEventLog(new Logs(astralus,
+				"Workflow " + name + " was created", "info", "optimization"));
 
 		try {
 			ObjectOutputStream out = new ObjectOutputStream(
@@ -282,10 +288,25 @@ public class MarsServer extends Thread implements Observer {
 			if (arg.getClass() == ResultsDTO.class) {
 				ResultsDTO resultsToBeSent = (ResultsDTO) arg;
 				out.writeObject(resultsToBeSent);
-			} else if (((String) arg).equalsIgnoreCase("NaN error")) {
-				id = -2L;
-			} else if (((String) arg).equalsIgnoreCase("End Optimization")) {
-				out.writeObject(new ResultsDTO(id));
+			} else if (arg.getClass() == Object[].class) {
+				Object[] args = (Object[]) arg;
+				String msg = (String) args[0];
+				Workflow w = (Workflow) args[1];
+				if(msg.equalsIgnoreCase("NaN error")){
+					id = -2L;
+					logs.addEventLog(new Logs(astralus, "Calculations in workflow "
+							+ w.getName() + " have reached NaN values", "error",
+							"optimization"));
+				} else if(msg.equalsIgnoreCase("End Optimization")){
+					Results r = (Results)args[2];
+					String log = String
+							.format("Calculations in worfklow %s have finished after %d iterations with span = %.3f, chord = %.3f and ratio = %.2f",
+									w.getName(), r.getIteration(),
+									r.getSpan(), r.getChord(), r.getRatio());
+					logs.addEventLog(new Logs(astralus, log, "info",
+							"optimization"));
+					out.writeObject(new ResultsDTO(id));
+				}
 			}
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block

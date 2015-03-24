@@ -86,7 +86,7 @@ public class AirfoilCalculator extends Observable {
 		double oldB;
 		double oldC;
 		double stepSize = STEP_SIZE;
-
+		Results result = null;
 		// TODO: Logs
 		for (int i = iterationsOffset; i < iterations + iterationsOffset; i++) {
 			oldB = b;
@@ -101,12 +101,12 @@ public class AirfoilCalculator extends Observable {
 			c = c - stepSize * calcNumericalDerivativeByC(oldB, oldC, stepSize);
 			if (ratio == Double.NaN || b == Double.NaN || c == Double.NaN) {
 				setChanged();
-				notifyObservers("NaN error");
+				notifyObservers(new Object[] { "NaN error", workflow });
 				break;
 			}
 
 			// Save current iteration results in the DB
-			Results result = new Results(workflow, i + 1, ANGLE, c, b,
+			result = new Results(workflow, i + 1, ANGLE, c, b,
 					dragForce, liftForce, ratio);
 			resultService.addResult(result);
 
@@ -120,7 +120,7 @@ public class AirfoilCalculator extends Observable {
 				stepSize /= 2.0;
 		}
 		setChanged();
-		notifyObservers("End Optimization");
+		notifyObservers(new Object[] { "End Optimization", workflow, result });
 	}
 
 	/**
