@@ -6,6 +6,7 @@
 package cranfield.group.project.airfoil.server.services;
 
 import cranfield.group.project.airfoil.server.entities.AbstractEntityObject;
+import java.io.Serializable;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -47,7 +48,7 @@ public class AbstractCRUDServiceTest {
         Object id = null;
         AbstractCRUDService instance = new AbstractCRUDServiceImpl();
         AbstractEntityObject expResult = null;
-        AbstractEntityObject result = instance.find(id);
+        AbstractEntityObject result = instance.find((Serializable) id);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");

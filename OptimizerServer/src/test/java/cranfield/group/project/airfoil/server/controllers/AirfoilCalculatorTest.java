@@ -50,7 +50,7 @@ public class AirfoilCalculatorTest {
         AirfoilCalculator instance = null;
         double[] expResult = null;
         double[] result = instance.optimize(b, c, stepSize);
-        assertArrayEquals(expResult, result);
+        //assertArrayEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
