@@ -45,6 +45,7 @@ import cranfield.group.project.airfoil.api.model.ResultsDTO;
 import cranfield.group.project.airfoil.api.model.WorkflowDTO;
 import cranfield.group.project.airfoil.client.MarsClient;
 import cranfield.group.project.airfoil.client.model.ServerOfflineException;
+import java.awt.BorderLayout;
 
 /**
  *
@@ -56,6 +57,7 @@ public class NewIteration extends JPanel implements ActionListener {
 	protected JButton createButton;
 	protected JButton iterateButton;
 	protected JButton startButton;
+        protected JButton clearWorkflow;
 	protected JPanel panelComponent = new JPanel();
 	protected JPanel panelInput = new JPanel();
 	protected JPanel panelPicture = new JPanel();
@@ -63,6 +65,7 @@ public class NewIteration extends JPanel implements ActionListener {
 	protected JPanel panelButton = new JPanel();
 	protected JPanel panelComboBox = new JPanel();
 	protected JPanel panelList = new JPanel();
+        protected JPanel panelButtonWorkflow = new JPanel();
 
 	protected GraphPanel panelGraph = new GraphPanel();
 	protected JComboBox comboDragCoeff = new JComboBox();
@@ -168,6 +171,11 @@ public class NewIteration extends JPanel implements ActionListener {
 		startButton = new JButton("start optimization");
 		iterateButton = new JButton("iterate");
 		createButton = new JButton("create new optimization");
+                clearWorkflow = new JButton("clear Workflow");
+                
+                
+                panelButtonWorkflow.setLayout(new BoxLayout(panelButtonWorkflow, BoxLayout.LINE_AXIS));
+                panelButtonWorkflow.add(clearWorkflow);
 
 		optimizationsListModel = new DefaultListModel();
 		initWorkflows();
@@ -216,8 +224,9 @@ public class NewIteration extends JPanel implements ActionListener {
 
 		Border loweredbevelList;
 		loweredbevelList = BorderFactory.createLoweredBevelBorder();
-		panelList.setLayout(new BoxLayout(panelList, BoxLayout.X_AXIS));
+		panelList.setLayout(new BoxLayout(panelList, BoxLayout.Y_AXIS));
 		panelList.add(paneList);
+                panelList.add(panelButtonWorkflow);
 		panelList.setBorder(loweredbevelList);
 		panelList.setPreferredSize(new Dimension(210, 100));
 		TitledBorder titleList;
@@ -254,6 +263,8 @@ public class NewIteration extends JPanel implements ActionListener {
 		startButton.addActionListener(new GetValueListener());
 		createButton.addActionListener(new CreateNewOptimListener());
 		iterateButton.addActionListener(new AddNewIterListener());
+                clearWorkflow.addActionListener(new ClearWorkflowListener());
+                
 		createButton.setEnabled(false);
 		iterateButton.setEnabled(false);
 		listSelectionListener = new SharedListSelectionHandler();
@@ -459,6 +470,13 @@ public class NewIteration extends JPanel implements ActionListener {
 			enableComponents(panelButton, true);
 			createButton.setEnabled(false);
 			iterateButton.setEnabled(false);
+		}
+	}
+        
+        class ClearWorkflowListener implements ActionListener {
+
+		public void actionPerformed(ActionEvent event) {
+			optimizationsListModel.clear();
 		}
 	}
 
