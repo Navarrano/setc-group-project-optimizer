@@ -1,5 +1,6 @@
 package cranfield.group.project.airfoil.client.view;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -11,6 +12,7 @@ import javax.swing.WindowConstants;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.labels.StandardXYToolTipGenerator;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
@@ -20,23 +22,45 @@ import cranfield.group.project.airfoil.api.model.ResultsDTO;
 
 public class GraphPanel extends JPanel implements Observer {
 	protected XYSeriesCollection graphData;
+	protected List<ResultsDTO> results;
 
 	public GraphPanel() {
 		super();
 		graphData = new XYSeriesCollection(new XYSeries("Lift / Drag"));
+		results = new LinkedList<>();
 		reset();
 	}
 
 	public void reset() {
 		graphData = new XYSeriesCollection(new XYSeries("Lift / Drag"));
+		results.clear();
 		removeAll();
 		JFreeChart ratioGraph = ChartFactory.createXYLineChart("",
 				"Iterations", "Lift/Drag", graphData, PlotOrientation.VERTICAL,
 				false, true, false);
+		addCustomToolTip(ratioGraph);
 
 		add(new ChartPanel(ratioGraph));
 		// Update the display to make the new graph appear
 		revalidate();
+	}
+
+	private void addCustomToolTip(JFreeChart chart) {
+		chart.getXYPlot().getRenderer()
+				.setBaseToolTipGenerator(new StandardXYToolTipGenerator() {
+					@Override
+					public String generateToolTip(XYDataset dataset,
+							int series, int item) {
+						String toolTip = "<html>"
+								+ super.generateToolTip(dataset, series,
+								item);
+						toolTip += String.format("<br>Span: %.3f",
+								results.get(item).getSpan());
+						toolTip += String.format("<br>Chord: %.3f</html>",
+								results.get(item).getChord());
+						return toolTip;
+					}
+				});
 	}
 
 	public void displayOptimizationRatio(List<ResultsDTO> workflowResults) {
@@ -46,6 +70,7 @@ public class GraphPanel extends JPanel implements Observer {
 				"Iterations", "Lift/Drag",
 				(XYDataset) createDataset(workflowResults),
 				PlotOrientation.VERTICAL, false, true, false);
+		addCustomToolTip(ratioGraph);
 
 		add(new ChartPanel(ratioGraph));
 		// Update the display to make the new graph appear
@@ -58,6 +83,7 @@ public class GraphPanel extends JPanel implements Observer {
 		JFreeChart ratioGraph = ChartFactory.createXYLineChart("",
 				"Iterations", "Lift/Drag", (XYDataset) graphData,
 				PlotOrientation.VERTICAL, false, true, false);
+		addCustomToolTip(ratioGraph);
 
 		add(new ChartPanel(ratioGraph));
 		// Update the display to make the new graph appear
@@ -66,6 +92,7 @@ public class GraphPanel extends JPanel implements Observer {
 
 	public void addValueToDataset(ResultsDTO result) {
 		graphData.getSeries(0).add(result.getIteration(), result.getRatio());
+		results.add(result);
 	}
 
 	private XYDataset createDataset(List<ResultsDTO> workflowResults) {
@@ -73,6 +100,7 @@ public class GraphPanel extends JPanel implements Observer {
 		for (int i = 0; i < workflowResults.size(); i++) {
 			graphData.getSeries(0)
 					.add(i + 1, workflowResults.get(i).getRatio());
+			results.add(workflowResults.get(i));
 		}
 		return graphData;
 	}
